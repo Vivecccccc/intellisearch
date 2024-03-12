@@ -1,0 +1,163 @@
+{
+  "name": "intellisearch",
+  "displayName": "intelliSearch",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.87.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/intellisearch/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "intellisearch.addFolders",
+        "title": "Add Folders",
+        "icon": "$(plus)"
+      },
+      {
+        "command": "intellisearch.removeFolder",
+        "title": "Remove Folder",
+        "icon": "$(minus)"
+      },
+      {
+        "command": "intellisearch.clearFolders",
+        "title": "Remove All Folders",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "intellisearch.selectLang",
+        "title": "Select Language",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "intellisearch.parseFile",
+        "title": "Parse File",
+        "icon": "$(play)"
+      },
+      {
+        "command": "intellisearch.loadMethods",
+        "title": "Load Methods"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "intellisearch",
+          "title": "intelliSearch",
+          "icon": "assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "intellisearch": [
+        {
+          "id": "intellisearch.hierachy",
+          "name": "Hierachy"
+        },
+        {
+          "id": "intellisearch.searchView",
+          "type": "webview",
+          "name": "Search"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "intellisearch.hierachy",
+        "contents": "No folders being selected. \n [Add Folders](command:intellisearch.addFolders)"
+      }
+    ],
+    "configuration": {
+      "title": "Parser Configuration",
+      "properties": {
+        "intellisearch.parserDefaultLanguage": {
+          "type": "string",
+          "enum": [
+            "c",
+            "cpp",
+            "csharp",
+            "go",
+            "java",
+            "javascript",
+            "python",
+            "rust",
+            "typescript"
+          ],
+          "default": "python",
+          "description": "Set the default language to parse"
+        },
+        "intellisearch.ignoreFolders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "node_modules",
+            "out",
+            "dist",
+            "build",
+            "target",
+            ".vscode",
+            ".git"
+          ],
+          "description": "Folders specified here will be ignored [glob pattern allows]"
+        }
+      }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "intellisearch.addFolders",
+          "when": "view == intellisearch.hierachy",
+          "group": "navigation"
+        },
+        {
+          "command": "intellisearch.clearFolders",
+          "when": "view == intellisearch.hierachy",
+          "group": "navigation"
+        },
+        {
+          "command": "intellisearch.selectLang",
+          "when": "view == intellisearch.hierachy",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "intellisearch.removeFolder",
+          "when": "view == intellisearch.hierachy && viewItem == rootDir",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "pnpm run compile && pnpm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.87.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "@vscode/test-cli": "^0.0.6",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "cec-client-server": "^1.3.2",
+    "html-modifier": "^1.2.0",
+    "reflect-metadata": "^0.2.1",
+    "web-tree-sitter": "^0.22.1"
+  }
+}
