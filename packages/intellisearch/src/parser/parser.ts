@@ -91,13 +91,13 @@ export async function getParser(
 
 export class ParsedMethod {
   name: string;
-  body: string;
+  // body: string;
   full: string;
   position: number[][];
 
-  constructor(name: string, body: string, full: string, position: number[][]) {
+  constructor(name: string, full: string, position: number[][]) {
     this.name = name;
-    this.body = body;
+    // this.body = body;
     this.full = full;
     this.position = position;
   }
@@ -126,8 +126,7 @@ export abstract class Lumberjack {
   abstract getMethodNameFieldToken(): string;
   abstract getMethodBodyFieldToken(): string;
 
-  parseFile(uri: vscode.Uri): ParsedMethod[] {
-    const fileContent = fs.readFileSync(uri.fsPath, "utf-8");
+  parseFile(fileContent: string): ParsedMethod[] {
     const tree = this.parser.parse(fileContent).rootNode;
     return this.extractAllMethods(tree);
   }
@@ -137,14 +136,14 @@ export abstract class Lumberjack {
 
     if (this.methodDefinitionTokens.includes(node.type)) {
       const name = this.extractMethodName(node);
-      const body = this.extractMethodBody(node);
+      // const body = this.extractMethodBody(node);
       const position = [
         [node.startPosition.row, node.startPosition.column],
         [node.endPosition.row, node.endPosition.column],
       ];
 
-      if (name && body) {
-        const method = new ParsedMethod(name, body, node.text, position);
+      if (name) {
+        const method = new ParsedMethod(name, node.text, position);
         methods.push(method);
       }
     } else {

@@ -55,19 +55,20 @@
     "views": {
       "intellisearch": [
         {
-          "id": "intellisearch.hierachy",
+          "id": "intellisearch.hierarchy",
           "name": "Hierachy"
         },
         {
           "id": "intellisearch.searchView",
           "type": "webview",
-          "name": "Search"
+          "name": "Search",
+          "when": "intellisearch.timeToSearch"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "intellisearch.hierachy",
+        "view": "intellisearch.hierarchy",
         "contents": "No folders being selected. \n [Add Folders](command:intellisearch.addFolders)"
       }
     ],
@@ -112,24 +113,24 @@
       "view/title": [
         {
           "command": "intellisearch.addFolders",
-          "when": "view == intellisearch.hierachy",
+          "when": "view == intellisearch.hierarchy",
           "group": "navigation"
         },
         {
           "command": "intellisearch.clearFolders",
-          "when": "view == intellisearch.hierachy",
+          "when": "view == intellisearch.hierarchy",
           "group": "navigation"
         },
         {
           "command": "intellisearch.selectLang",
-          "when": "view == intellisearch.hierachy",
+          "when": "view == intellisearch.hierarchy",
           "group": "navigation"
         }
       ],
       "view/item/context": [
         {
           "command": "intellisearch.removeFolder",
-          "when": "view == intellisearch.hierachy && viewItem == rootDir",
+          "when": "view == intellisearch.hierarchy && viewItem == rootDir",
           "group": "navigation"
         }
       ]

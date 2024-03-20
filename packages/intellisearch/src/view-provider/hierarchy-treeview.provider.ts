@@ -31,7 +31,7 @@ export class HierachyTreeItem extends vscode.TreeItem {
     if (stat.isFile()) {
       const srcLang = decideLanguageFromUri(uri);
       return srcLang === pickedLang;
-    } else if (stat.isDirectory()) {
+    } else if (stat.isDirectory() && !isIgnoredFolder(uri)) {
       const children = fs.readdirSync(uri.fsPath);
       for (let i = 0; i < children.length; i++) {
         let childUri = vscode.Uri.file(path.join(uri.fsPath, children[i]));
@@ -73,21 +73,22 @@ export class HierachyTreeProvider
   readonly onDidChangeTreeData: vscode.Event<HierachyTreeItem | undefined> =
     this._onDidChangeTreeData.event;
 
-  filesSnapshot: vscode.Uri[] = [];
+  filesSnapshot: string[] = [];
   methodsSnapshot: Map<string, ParsedMethod[]> = new Map();
-  hierachyTreeView: vscode.TreeView<HierachyTreeItem> | undefined = undefined;
+  hierarchyTreeView: vscode.TreeView<HierachyTreeItem> | undefined = undefined;
 
   constructor(
     public folders: vscode.Uri[],
     public pickedLang: string
   ) {
+    
     this.filesSnapshot = this.getConcernedFiles();
-    this.injectMethodInFile();
-    this.hierachyTreeView = vscode.window.createTreeView(
-      "intellisearch.hierachy",
+    this.updateMethodsSnapshot();
+    this.hierarchyTreeView = vscode.window.createTreeView(
+      "intellisearch.hierarchy",
       { treeDataProvider: this }
     );
-    this.hierachyTreeView.badge = {
+    this.hierarchyTreeView.badge = {
       value: this.filesSnapshot.length,
       tooltip: `${this.filesSnapshot.length} valid files`,
     };
@@ -96,9 +97,9 @@ export class HierachyTreeProvider
 
   refresh(): void {
     this.filesSnapshot = this.getConcernedFiles();
-    this.injectMethodInFile();
-    if (this.hierachyTreeView) {
-      this.hierachyTreeView.badge = {
+    this.updateMethodsSnapshot();
+    if (this.hierarchyTreeView) {
+      this.hierarchyTreeView.badge = {
         value: this.filesSnapshot.length,
         tooltip: `${this.filesSnapshot.length} valid files`,
       };
@@ -128,7 +129,7 @@ export class HierachyTreeProvider
         let children = fs
           .readdirSync(element.uri.fsPath)
           .filter((child) => {
-            return !this.isIgnoredFolder(
+            return !isIgnoredFolder(
               vscode.Uri.file(path.join(element.uri.fsPath, child))
             );
           })
@@ -169,7 +170,7 @@ export class HierachyTreeProvider
       // get the common prefix of the root items
       const prefix = this.getCommonPath();
       const rootItems = this.folders
-        .filter((folder) => !this.isIgnoredFolder(folder))
+        .filter((folder) => !isIgnoredFolder(folder))
         .map(
           (folder) =>
             new HierachyTreeItem(
@@ -213,10 +214,10 @@ export class HierachyTreeProvider
     return commonPath.join(path.sep);
   }
 
-  private getConcernedFiles(): vscode.Uri[] {
-    let files: vscode.Uri[] = [];
+  private getConcernedFiles(): string[] {
+    let files: string[] = [];
     this.folders = this.folders.filter(
-      (folder) => !this.isIgnoredFolder(folder)
+      (folder) => !isIgnoredFolder(folder)
     );
     this.folders.forEach((folder) => {
       const getFiles = (dir: string) => {
@@ -224,14 +225,14 @@ export class HierachyTreeProvider
         for (const entry of entries) {
           const fullPath = path.join(dir, entry.name);
           if (entry.isDirectory()) {
-            if (this.isIgnoredFolder(vscode.Uri.file(fullPath))) {
+            if (isIgnoredFolder(vscode.Uri.file(fullPath))) {
               continue;
             }
             getFiles(fullPath);
           } else if (
             decideLanguageFromUri(vscode.Uri.file(fullPath)) === this.pickedLang
           ) {
-            files.push(vscode.Uri.file(fullPath));
+            files.push(fullPath);
           }
         }
       };
@@ -241,17 +242,10 @@ export class HierachyTreeProvider
   }
 
   private injectMethodInFile() {
-    // clean the previous methods if its file is not in the current filesSnapshot
-    this.methodsSnapshot.forEach((methods, uri) => {
-      if (!this.filesSnapshot.includes(vscode.Uri.file(uri))) {
-        this.methodsSnapshot.delete(uri);
-      }
-    });
     // add new files
     let newFiles = this.filesSnapshot.filter(
-      (uri) => !this.methodsSnapshot.has(uri.fsPath)
+      (path) => !this.methodsSnapshot.has(path)
     );
-    // execute command `intellisearch.parseFile` to get the parsed methods
     vscode.commands
       .executeCommand("intellisearch.parseFile", newFiles)
       .then((parsedMethods) => {
@@ -261,11 +255,25 @@ export class HierachyTreeProvider
     this._onDidChangeTreeData.fire(undefined);
   }
 
+  private lazyInjectMethodInFile(items: HierachyTreeItem[]) {
+    let fileUris = items.map((item) => item.uri);
+    vscode.commands.executeCommand("intellisearch.parseFile", fileUris)
+      .then((parsedMethods) => {
+        const fileMethodMap = parsedMethods as Map<string, { flag: boolean, methods: ParsedMethod[] }>;
+        for (let [filePath, fileUpdates] of fileMethodMap.entries()) {
+          if (fileUpdates.flag || !this.methodsSnapshot.has(filePath)) { 
+            this.methodsSnapshot.set(filePath, fileUpdates.methods);
+            this._onDidChangeTreeData.fire(undefined); 
+          }
+        }
+      });
+  }
+
   private registerChangeSelectionListener() {
-    if (!this.hierachyTreeView) {
+    if (!this.hierarchyTreeView) {
       return;
     }
-    this.hierachyTreeView.onDidChangeSelection(async (e) => {
+    this.hierarchyTreeView.onDidChangeSelection(async (e) => {
       if (e.selection && e.selection.length > 0) {
         let item = e.selection[0];
         if (item instanceof MethodTreeItem) {
@@ -288,20 +296,37 @@ export class HierachyTreeProvider
         } else if (item instanceof HierachyTreeItem) {
           if (!fs.statSync(item.uri.fsPath).isDirectory()) {
             vscode.window.showTextDocument(item.uri);
+            if (this.filesSnapshot.includes(item.uri.fsPath)) { this.lazyInjectMethodInFile([item]); }
+          } else {
+            let children = await this.getChildren(item);
+            if (!children) {
+              return;
+            }
+            children = children.filter((child) => this.filesSnapshot.includes(child.uri.fsPath));
+            this.lazyInjectMethodInFile(children);
           }
         }
       }
     });
   }
 
-  private isIgnoredFolder(folder: vscode.Uri): boolean {
-    let ignoreFolders =
-      vscode.workspace
-        .getConfiguration("intellisearch")
-        .get<string[]>("ignoreFolders") || [];
-    let baseName = path.basename(folder.fsPath);
-    return ignoreFolders.some((ignorePattern) =>
-      minimatch(baseName, ignorePattern)
-    );
+  private updateMethodsSnapshot() {
+    // clean the previous methods if its file is not in the current filesSnapshot
+    this.methodsSnapshot.forEach((methods, uri) => {
+      if (!this.filesSnapshot.includes(uri)) {
+        this.methodsSnapshot.delete(uri);
+      }
+    });
   }
+}
+
+function isIgnoredFolder(folder: vscode.Uri): boolean {
+  let ignoreFolders =
+    vscode.workspace
+      .getConfiguration("intellisearch")
+      .get<string[]>("ignoreFolders") || [];
+  let baseName = path.basename(folder.fsPath);
+  return ignoreFolders.some((ignorePattern) =>
+    minimatch(baseName, ignorePattern)
+  );
 }

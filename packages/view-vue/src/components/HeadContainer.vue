@@ -3,6 +3,8 @@
 import { UserFilled } from '@element-plus/icons-vue'
 // const logoUrl = useWebviewPublicPath(logoPath)
 // console.log(logoUrl)
+const vscode = acquireVsCodeApi()
+
 export default {
   data() {
     return {
@@ -15,6 +17,9 @@ export default {
   methods: {
     login() {
       console.log('Login')
+      vscode.postMessage({
+        command: 'login'
+      });
     },
     search() {
       console.log('Search:', this.searchQuery)
