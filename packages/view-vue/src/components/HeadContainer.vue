@@ -11,15 +11,41 @@ export default {
       searchQuery: '',
       fullscreenLoading: false,
       // logoUrl: useWebviewPublicPath(logoPath),
-      userFilled: UserFilled
+      userFilled: UserFilled,
+      userId: '',
+      expiry: 0,
+      countdownInterval: null,
     };
   },
   methods: {
     login() {
-      console.log('Login')
       vscode.postMessage({
         command: 'login'
       });
+    },
+    fetchLoginCredential(msg) {
+      const command = msg.command;
+      if (command === 'loginSuccess') {
+        this.userId = msg.credential.userId;
+        this.expiry = msg.credential.expiry;
+        console.log('Expiry:', this.expiry, 'UserId:', this.userId);
+        this.startCountdown();
+      }
+    },
+    startCountdown() {
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+      }
+      this.countdownInterval = setInterval(() => {
+        if (this.expiry <= 0) {
+          clearInterval(this.countdownInterval);
+          this.countdownInterval = null;
+          this.userId = '';
+          this.expiry = 0;
+        } else {
+          this.expiry -= 1;
+        }
+      }, 1000);
     },
     search() {
       console.log('Search:', this.searchQuery)
@@ -31,13 +57,25 @@ export default {
       }, 2000);
     },
   },
+  mounted() {
+    window.addEventListener('message', event => {
+      const message = event.data;
+      this.fetchLoginCredential(message)
+    });
+  },
+  beforeUnmount() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  }
 };
 </script>
 
 <template>
   <div class="head-container">
     <div class="avatar" @click="login">
-      <el-avatar :icon="userFilled" />
+      <el-avatar v-if="!userId" :icon="userFilled"></el-avatar>
+      <el-avatar v-else> {{ userId }} </el-avatar>
     </div>
     <el-input type="textarea" class="search-bar" v-model="searchQuery" placeholder="Search..." :autosize="{minRows:1, maxRows:4}" resize="none"></el-input>
     <!-- <el-button color="#FF3333">Search</el-button> -->

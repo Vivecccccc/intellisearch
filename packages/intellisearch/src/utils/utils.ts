@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as fs from "fs";
+import * as cryto from "crypto";
 
 export function decideLanguageFromUri(uri: vscode.Uri): string {
   const ext = path.extname(uri.fsPath).slice(1);
@@ -90,4 +90,9 @@ export async function pickLang(): Promise<string> {
   }
   targetLang = languagesMap.get(targetLang) as string;
   return targetLang;
+}
+
+// use sha256 to hash any string
+export function sha256Hash(s: string) {
+  return cryto.createHash("sha256").update(s).digest("hex");
 }

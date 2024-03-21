@@ -89,22 +89,24 @@ export async function getParser(
   return parser;
 }
 
-export class ParsedMethod {
+export class Method {
   name: string;
   // body: string;
   full: string;
   position: number[][];
+  signature: string;
 
   constructor(name: string, full: string, position: number[][]) {
     this.name = name;
     // this.body = body;
     this.full = full;
     this.position = position;
+    this.signature = this.getSignature();
   }
 
   // implement a hash function for the class for comparison
-  hashCode(): string {
-    const signature = this.full;
+  getSignature(): string {
+    const signature = `${this.position}@${this.full}`;
     return signature;
   }
 }
@@ -126,13 +128,13 @@ export abstract class Lumberjack {
   abstract getMethodNameFieldToken(): string;
   abstract getMethodBodyFieldToken(): string;
 
-  parseFile(fileContent: string): ParsedMethod[] {
+  parseFile(fileContent: string): Method[] {
     const tree = this.parser.parse(fileContent).rootNode;
     return this.extractAllMethods(tree);
   }
 
-  extractAllMethods(node: Parser.SyntaxNode): ParsedMethod[] {
-    const methods: ParsedMethod[] = [];
+  extractAllMethods(node: Parser.SyntaxNode): Method[] {
+    const methods: Method[] = [];
 
     if (this.methodDefinitionTokens.includes(node.type)) {
       const name = this.extractMethodName(node);
@@ -143,7 +145,7 @@ export abstract class Lumberjack {
       ];
 
       if (name) {
-        const method = new ParsedMethod(name, node.text, position);
+        const method = new Method(name, node.text, position);
         methods.push(method);
       }
     } else {

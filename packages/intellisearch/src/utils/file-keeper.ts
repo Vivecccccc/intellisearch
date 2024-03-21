@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as crypto from 'crypto';
-import { ParsedMethod } from '../parser/parser';
+import { Method } from '../parser/parser';
 
 type FileElem = {
   fileHash: string,
-  methods: ParsedMethod[] | null
+  methods: Method[] | null
 };
 
 export class FileKeeper {

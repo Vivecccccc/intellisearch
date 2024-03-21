@@ -4,10 +4,10 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import Parser from "web-tree-sitter";
 
-import { ViewProviderSidebar } from "./view-provider/search-webview-sidebar.provider";
+import { SearchViewProvider } from "./view-provider/search-webview-sidebar.provider";
 import { HierachyTreeItem, HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
 import { pickLang, removeSubFolders } from "./utils/utils";
-import { ParsedMethod, getParser } from "./parser/parser";
+import { Method, getParser } from "./parser/parser";
 import { langRouter } from "./parser/lang-adapter";
 import { FileKeeper } from "./utils/file-keeper";
 
@@ -28,10 +28,10 @@ export function activate(context: vscode.ExtensionContext) {
     fileKeeper.deserialize(fileKeeperStorage);
   }
 
-  const viewProviderSidebar: vscode.WebviewViewProvider = new ViewProviderSidebar(context);
-  const sidebarViewDisposable = vscode.window.registerWebviewViewProvider(
+  const searchViewProvider: vscode.WebviewViewProvider = new SearchViewProvider(context);
+  const searchViewDisposable = vscode.window.registerWebviewViewProvider(
     "intellisearch.searchView",
-    viewProviderSidebar,
+    searchViewProvider,
     { webviewOptions: { retainContextWhenHidden: true } }
   );
   
@@ -75,7 +75,6 @@ export function activate(context: vscode.ExtensionContext) {
           hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang);
         }
       }
-      vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
     }
   );
 
@@ -103,7 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const disposableParseFile = vscode.commands.registerCommand(
     "intellisearch.parseFile",
-    async (files: vscode.Uri[] | undefined) => {
+    async (files: string[] | undefined) => {
       if (!pickedLang) {
         pickedLang = await pickLang();
       }
@@ -113,33 +112,42 @@ export function activate(context: vscode.ExtensionContext) {
 
       const lumberjack = langRouter(pickedLang, parser);
       // initialize a dictionary to store the parsed methods and their file paths
-      const parsedMethods: Map<string, { flag: boolean, methods: ParsedMethod[] }> = new Map();
+      const parsedMethods: Map<string, { flag: boolean, methods: Method[] }> = new Map();
       for (let i = 0; i < concernedFiles.length; i++) {
-        const file = concernedFiles[i];
-        const fileUpdates = fileKeeper.checkFileUpdate(file.fsPath);
-        let methods: ParsedMethod[];
+        const filePath = concernedFiles[i];
+        const fileUpdates = fileKeeper.checkFileUpdate(filePath);
+        let methods: Method[];
         if (!fileUpdates.flag) {
           methods = fileUpdates.fileElem.methods!;
         } else {
           methods = lumberjack.parseFile(fileUpdates.fileContent);
-          fileKeeper.addFile(file.fsPath, { fileHash: fileUpdates.fileElem.fileHash, methods: methods });
+          fileKeeper.addFile(filePath, { fileHash: fileUpdates.fileElem.fileHash, methods: methods });
         }
         if (methods && methods.length > 0) {
-          parsedMethods.set(file.fsPath, { flag: fileUpdates.flag, methods: methods });
+          parsedMethods.set(filePath, { flag: fileUpdates.flag, methods: methods });
         }
       }
       return parsedMethods;
     }
   );
 
+  const disposableParseAll = vscode.commands.registerCommand(
+    "intellisearch.parseAll",
+    async () => {
+      hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
+      vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
+    }
+  );
+
   context.subscriptions.push(
     ...[
-      sidebarViewDisposable,
+      searchViewDisposable,
       disposableAddFolders,
       disposableClearFolders,
       disposableRemoveFolder,
       disposableSelectLanguage,
       disposableParseFile,
+      disposableParseAll,
     ]
   );
 }
