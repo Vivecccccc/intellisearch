@@ -145,7 +145,7 @@ export abstract class Lumberjack {
       ];
 
       if (name) {
-        const method = new Method(name, node.text, position);
+        const method = new Method(name, this.reIndentMethod(node), position);
         methods.push(method);
       }
     } else {
@@ -176,5 +176,26 @@ export abstract class Lumberjack {
       return possibleBodyNode.text;
     }
     return null;
+  }
+
+  protected reIndentMethod(node: Parser.SyntaxNode): string {
+    let offset = 0;
+    const methodStartPosition = node.startPosition;
+    const possibleBodyNode = node.childForFieldName(this.methodBodyFieldToken);
+    if (possibleBodyNode) {
+      // get the first child of the body node 
+      // which is not at the same row as the method node
+      for (let i = 0; i < possibleBodyNode.childCount; i++) {
+        const childNode = possibleBodyNode.child(i);
+        if (childNode && childNode.startPosition.row !== methodStartPosition.row) {
+          offset = childNode.startPosition.column - methodStartPosition.column;
+          break;
+        }
+      }
+    }
+    return node.text
+      .split("\n")
+      .map((line) => line.slice(0))
+      .join("\n");
   }
 }

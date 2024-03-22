@@ -79,7 +79,7 @@ export default {
   color: var(--vscode-input-foreground)
 }
 
-.code-container {
+.el-scrollbar {
   max-height: 200px;
   overflow: auto;
 }

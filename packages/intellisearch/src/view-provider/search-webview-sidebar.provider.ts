@@ -14,9 +14,11 @@ enum MethodKind {
 }
 
 type MethodToShow = {
+  hash: string,
   filePath: string,
   method: Method
-  shown: boolean
+  shown: boolean,
+  lang: string | undefined
 };
 
 export class SearchViewProvider extends AbstractViewProvider implements WebviewViewProvider {
@@ -37,6 +39,7 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
     };
     webviewView.webview.html = await this.getWebviewHtml(webviewView.webview);
     this.registerLoginListener();
+    this.registerLoadMoreListener();
   }
 
   registerLoginListener() {
@@ -66,6 +69,15 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
     });
   }
 
+  registerLoadMoreListener() {
+    this._view?.webview.onDidReceiveMessage(async (data) => {
+      if (data.command === "loadMore") {
+        const numOfMethods = data.numOfMethods;
+        this.loadMoreMethodsFromPool(numOfMethods);
+      }
+    });
+  }
+
   public updateMethodPool(parsedMethods: Map<string, Method[]>, addOp: boolean) {
     let methodsToBeHidden: MethodToShow[] = [];
     for (const [filePath, methods] of parsedMethods.entries()) {
@@ -73,13 +85,17 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
         const parsedMethodHash = `${sha256Hash(filePath)}-${sha256Hash(method.signature)}`;
         // if the method is already in the pool and is shown, it will be hidden
         if (this.methodPool.has(parsedMethodHash) && this.methodPool.get(parsedMethodHash)!.shown) {
-          methodsToBeHidden.push(this.methodPool.get(parsedMethodHash)!);
+          const methodToBeHidden = this.methodPool.get(parsedMethodHash)!;
+          methodToBeHidden.shown = false;
+          methodsToBeHidden.push(methodToBeHidden);
         }
         if (addOp) {
           this.methodPool.set(parsedMethodHash, {
+            hash: parsedMethodHash,
             filePath: filePath,
             method: method,
-            shown: false
+            shown: false,
+            lang: this.context.globalState.get('pickedLang'),
           });
         } else {
           this.methodPool.delete(parsedMethodHash);
@@ -107,7 +123,7 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
 
   public postMethodsToWebview(kinds: MethodKind[], methods: MethodToShow[], addOp: boolean) {
     const message = {
-      command: "update",
+      command: "updateMethods",
       kinds: kinds,
       methods: methods,
       addOp: addOp
@@ -116,4 +132,6 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
       this._view.webview.postMessage(message);
     }
   }
+
+  // TODO implement logic to send notification if there is any new method
 }

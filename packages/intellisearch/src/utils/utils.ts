@@ -50,7 +50,7 @@ export function removeSubFolders(folders: vscode.Uri[]): vscode.Uri[] {
   });
 }
 
-export async function pickLang(): Promise<string> {
+export async function pickLang(context: vscode.ExtensionContext): Promise<string> {
   const languages = [
     "C",
     "C++",
@@ -89,6 +89,7 @@ export async function pickLang(): Promise<string> {
     return defaultLang;
   }
   targetLang = languagesMap.get(targetLang) as string;
+  context.globalState.update("pickedLang", targetLang);
   return targetLang;
 }
 

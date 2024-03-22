@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
     fileKeeper.deserialize(fileKeeperStorage);
   }
 
-  const searchViewProvider: vscode.WebviewViewProvider = new SearchViewProvider(context);
+  const searchViewProvider: SearchViewProvider = new SearchViewProvider(context);
   const searchViewDisposable = vscode.window.registerWebviewViewProvider(
     "intellisearch.searchView",
     searchViewProvider,
@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
   const disposableSelectLanguage = vscode.commands.registerCommand(
     "intellisearch.selectLang",
     async () => {
-      pickedLang = await pickLang();
+      pickedLang = await pickLang(context);
       if (hierarchyTreeProvider) {
         hierarchyTreeProvider.pickedLang = pickedLang;
         hierarchyTreeProvider.refresh();
@@ -56,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
         openLabel: "Add Folders",
       });
       if (uris && !pickedLang) {
-        pickedLang = await pickLang();
+        pickedLang = await pickLang(context);
       }
 
       if (uris && uris.length) {
@@ -72,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
           hierarchyTreeProvider.folders = filteredFolders;
           hierarchyTreeProvider.refresh();
         } else {
-          hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang);
+          hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang, searchViewProvider);
         }
       }
     }
@@ -104,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     "intellisearch.parseFile",
     async (files: string[] | undefined) => {
       if (!pickedLang) {
-        pickedLang = await pickLang();
+        pickedLang = await pickLang(context);
       }
       parser = await getParser(pickedLang, context);
 
@@ -139,6 +139,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const disposableNotifyWebview = vscode.commands.registerCommand(
+    "intellisearch.notifyWebview",
+    (methods: Map<string, Method[]>, addOp: boolean) => {
+      searchViewProvider.updateMethodPool(methods, addOp);
+    }
+  );
+
   context.subscriptions.push(
     ...[
       searchViewDisposable,
@@ -148,6 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
       disposableSelectLanguage,
       disposableParseFile,
       disposableParseAll,
+      disposableNotifyWebview,
     ]
   );
 }

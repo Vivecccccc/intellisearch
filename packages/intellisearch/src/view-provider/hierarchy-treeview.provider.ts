@@ -5,6 +5,7 @@ import { minimatch } from "minimatch";
 
 import { decideLanguageFromUri } from "../utils/utils";
 import { Method } from "../parser/parser";
+import { SearchViewProvider } from "./search-webview-sidebar.provider";
 
 export class HierachyTreeItem extends vscode.TreeItem {
   constructor(
@@ -76,10 +77,12 @@ export class HierachyTreeProvider
   filesSnapshot: string[] = [];
   methodsSnapshot: Map<string, Method[]> = new Map();
   hierarchyTreeView: vscode.TreeView<HierachyTreeItem> | undefined = undefined;
+  searchWebviewProvider: SearchViewProvider;
 
   constructor(
     public folders: vscode.Uri[],
-    public pickedLang: string
+    public pickedLang: string,
+    searchWebviewProvider: SearchViewProvider
   ) {
     
     this.filesSnapshot = this.getConcernedFiles();
@@ -92,6 +95,7 @@ export class HierachyTreeProvider
       value: this.filesSnapshot.length,
       tooltip: `${this.filesSnapshot.length} valid files`,
     };
+    this.searchWebviewProvider = searchWebviewProvider;
     this.registerChangeSelectionListener();
   }
 
@@ -244,8 +248,8 @@ export class HierachyTreeProvider
   injectMethodInFile(paths: string[]) {
     vscode.commands
       .executeCommand("intellisearch.parseFile", paths)
-      .then((parsedMethods) => {
-        const fileMethodMap = parsedMethods as Map<string, { flag: boolean, methods: Method[] }>;
+      .then((parsedMethodsWithFlag) => {
+        const fileMethodMap = parsedMethodsWithFlag as Map<string, { flag: boolean, methods: Method[] }>;
         this.setParsedMethods(fileMethodMap);
       });
   }
@@ -253,18 +257,23 @@ export class HierachyTreeProvider
   private lazyInjectMethodInFile(items: HierachyTreeItem[]) {
     let filePaths = items.map((item) => item.uri.fsPath);
     vscode.commands.executeCommand("intellisearch.parseFile", filePaths)
-      .then((parsedMethods) => {
-        const fileMethodMap = parsedMethods as Map<string, { flag: boolean, methods: Method[] }>;
+      .then((parsedMethodsWithFlag) => {
+        const fileMethodMap = parsedMethodsWithFlag as Map<string, { flag: boolean, methods: Method[] }>;
         this.setParsedMethods(fileMethodMap);
       });
   }
 
-  private setParsedMethods(parsedMethods: Map<string, { flag: boolean, methods: Method[] }>) {
-    for (let [filePath, fileUpdates] of parsedMethods.entries()) {
+  private setParsedMethods(parsedMethodsWithFlag: Map<string, { flag: boolean, methods: Method[] }>) {
+    const newlyParsedMethods = new Map<string, Method[]>();
+    for (let [filePath, fileUpdates] of parsedMethodsWithFlag.entries()) {
       if (fileUpdates.flag || !this.methodsSnapshot.has(filePath)) { 
         this.methodsSnapshot.set(filePath, fileUpdates.methods);
+        newlyParsedMethods.set(filePath, fileUpdates.methods);
       }
-      this._onDidChangeTreeData.fire(undefined); 
+    }
+    this._onDidChangeTreeData.fire(undefined); 
+    if (newlyParsedMethods.size) {
+      this.searchWebviewProvider.updateMethodPool(newlyParsedMethods, true);
     }
   }
 
@@ -311,11 +320,18 @@ export class HierachyTreeProvider
 
   private updateMethodsSnapshot() {
     // clean the previous methods if its file is not in the current filesSnapshot
+    const removedParsedMethods = new Map<string, Method[]>();
     this.methodsSnapshot.forEach((methods, uri) => {
       if (!this.filesSnapshot.includes(uri)) {
-        this.methodsSnapshot.delete(uri);
+        const flag = this.methodsSnapshot.delete(uri);
+        if (flag) {
+          removedParsedMethods.set(uri, methods);
+        }
       }
     });
+    if (removedParsedMethods.size) {
+      this.searchWebviewProvider.updateMethodPool(removedParsedMethods, false);
+    }
   }
 }
 

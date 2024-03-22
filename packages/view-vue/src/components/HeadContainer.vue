@@ -3,7 +3,7 @@
 import { UserFilled } from '@element-plus/icons-vue'
 // const logoUrl = useWebviewPublicPath(logoPath)
 // console.log(logoUrl)
-const vscode = acquireVsCodeApi()
+import { vscodeApi } from '../App.vue';
 
 export default {
   data() {
@@ -19,7 +19,7 @@ export default {
   },
   methods: {
     login() {
-      vscode.postMessage({
+      vscodeApi.postMessage({
         command: 'login'
       });
     },

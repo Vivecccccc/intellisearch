@@ -9,6 +9,8 @@
 import HeadContainer from './components/HeadContainer.vue';
 import ResultsContainer from './components/ResultsContainer.vue';
 
+export const vscodeApi = acquireVsCodeApi();
+
 export default {
   components: {
     HeadContainer,

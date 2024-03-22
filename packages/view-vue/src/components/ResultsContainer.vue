@@ -6,9 +6,10 @@
       </el-card>
       <p v-else>No search results</p>
       <el-divider content-position="left">Other Functions</el-divider>
-      <el-card v-infinite-scroll="loadMore" infinite-scroll-distance="20" class="results-wrapper-lower">
-        <FunctionContainer v-for="item in items" :key="item.id" :code="item.code" :path="item.path" :lang="item.lang"/>
+      <el-card v-if="items.length > 0" v-infinite-scroll="loadMore" infinite-scroll-distance="20" class="results-wrapper-lower">
+        <FunctionContainer v-for="item in items" :key="item.hash" :code="item.code" :path="item.path" :lang="item.lang"/>
       </el-card>
+      <p v-else>No other methods</p>
     </el-main>
   </el-container>
 </template>
@@ -16,6 +17,8 @@
 <script>
 import FunctionContainer from './FunctionContainer.vue';
 import { ElLoading } from 'element-plus';
+
+import { vscodeApi } from '../App.vue';
 
 export default {
   components: {
@@ -25,21 +28,13 @@ export default {
     return {
       // Mock data for search results
       searchResults: [
-        { id: 1, code: 'var a = b + 1', path: '/path-to-code-1', lang: 'javascript' },
-        { id: 2, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: '/path-to-code-2', lang: 'javascript' },
+        { hash: 1, code: 'var a = b + 1', path: '/path-to-code-1', lang: 'javascript' },
+        { hash: 2, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: '/path-to-code-2', lang: 'javascript' },
       ],
       // Mock data for items that could be loaded
-      items: [
-        { id: 3, code: 'def add(a, b):\n    print("The sum is", a + b)\n\nadd(3, 4)', path: '/path-to-code-3', lang: 'python' },
-        { id: 4, code: 'public class Main {\n    public static void main(String[] args) {\n        add(3, 4);\n    }\n    \n    public static void add(int a, int b) {\n        System.out.println("The sum is " + (a + b));\n    }\n}', path: '/path-to-code-4', lang: 'java' },
-        { id: 5, code: '#include <iostream>\n\nvoid add(int a, int b) {\n    std::cout << "The sum is " << (a + b) << std::endl;\n}\n\nint main() {\n    add(3, 4);\n    return 0;\n}', path: '/path-to-code-5', lang: 'cpp' },
-        { id: 6, code: 'using System;\n\nclass Program {\n    static void Main() {\n        Add(3, 4);\n    }\n    \n    static void Add(int a, int b) {\n        Console.WriteLine("The sum is " + (a + b));\n    }\n}', path: '/path-to-code-6', lang: 'csharp' },
-        { id: 7, code: 'fn add(a: i32, b: i32) {\n    println!("The sum is {}", a + b);\n}\n\nfn main() {\n    add(3, 4);\n}', path: '/path-to-code-7', lang: 'rust' },
-        { id: 8, code: 'function add(a: number, b: number): void {\n    console.log(`The sum is ${a + b}`);\n}\n\nadd(3, 4);', path: '/path-to-code-8', lang: 'typescript' },
-        { id: 9, code: '#include <stdio.h>\n\nvoid add(int a, int b) {\n    printf("The sum is %d\\n", a + b);\n}\n\nint main() {\n    add(3, 4);\n    return 0;\n}', path: '/path-to-code-9', lang: 'c' },
-        { id: 10, code: 'package main\n\nimport "fmt"\n\nfunc add(a int, b int) {\n    fmt.Printf("The sum is %d\\n", a + b)\n}\n\nfunc main() {\n    add(3, 4)\n}', path: '/path-to-code-10', lang: 'go' },
-      ],
+      items: [],
       busy: false,
+      loadingState: null,
     };
   },
   methods: {
@@ -47,22 +42,57 @@ export default {
       console.log(this.busy)
       if (this.busy) return;
       this.busy = true;
-      let loading = ElLoading.service({
+      this.loadingState = ElLoading.service({
         lock: true,
         text: 'Loading',
         background: 'rgba(122, 122, 122, 0.4)'
       })
-      setTimeout(() => {
-        let newItems = [];
-        for(let i = 0; i < 2; i++) {
-          newItems.push({ id: this.items.length + i, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: `/path-to-code-${this.items.length + i}`, lang: 'javascript'});
-        }
-        this.items = [...this.items, ...newItems];
-        this.busy = false;
-        loading.close()
-      }, 1000);
+      vscodeApi.postMessage({ command: 'loadMore', numOfMethods: 5 });
+      // setTimeout(() => {
+      //   let newItems = [];
+      //   for(let i = 0; i < 2; i++) {
+      //     newItems.push({ id: this.items.length + i, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: `/path-to-code-${this.items.length + i}`, lang: 'javascript'});
+      //   }
+      //   this.items = [...this.items, ...newItems];
+      //   this.busy = false;
+      //   loading.close()
+      // }, 1000);
     },
+    fetchMethods(msg) {
+      const command = msg.command;
+      if (command === 'updateMethods') {
+        const { kinds, methods, addOp } = msg;
+        methods.forEach(methodElem => {
+          if (kinds.includes(0)) {
+            this.operateData(methodElem, this.items, addOp)
+          }
+          if (kinds.includes(1)) {
+            this.operateData(methodElem, this.searchResults, addOp)
+          }
+        })
+      }
+    },
+    operateData(methodElem, container, addOp) {
+      const { hash, filePath, method, shown, lang } = methodElem;
+      const methodFull = method.full;
+      if (addOp && shown) {
+        container.push({ hash, code: methodFull, path: filePath, lang });
+      } 
+      else if (!addOp && !shown) {
+        const index = container.findIndex(item => item.hash === hash);
+        container.splice(index, 1);
+      }
+    }
   },
+  mounted() {
+    window.addEventListener('message', event => {
+      const message = event.data;
+      this.fetchMethods(message);
+      this.busy = false;
+      this.loadingState.close();
+    });
+    this.loadMore();
+  }
 };
 </script>
 
