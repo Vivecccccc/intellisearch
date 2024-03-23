@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { normalize } from 'upath';
 
 import { ExtensionContext, WebviewView, WebviewViewProvider } from "vscode";
 import { AbstractViewProvider } from "./search-webview-abstract.provider";
@@ -92,7 +93,7 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
         if (addOp) {
           this.methodPool.set(parsedMethodHash, {
             hash: parsedMethodHash,
-            filePath: filePath,
+            filePath: normalize(filePath),
             method: method,
             shown: false,
             lang: this.context.globalState.get('pickedLang'),

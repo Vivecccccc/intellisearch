@@ -172,6 +172,7 @@
     "cec-client-server": "^1.3.2",
     "html-modifier": "^1.2.0",
     "reflect-metadata": "^0.2.1",
+    "upath": "^2.0.1",
     "web-tree-sitter": "^0.22.1"
   }
 }

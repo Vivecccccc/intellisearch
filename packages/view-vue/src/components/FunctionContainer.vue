@@ -2,10 +2,17 @@
   <el-card class="function-container" shadow="hover">
     <template #header>
       <div class="file-path">
-        <span>{{ path }}</span>
+        <el-tooltip>
+          <template v-slot:content>
+            {{ path }}
+          </template>
+          <span>{{ trimmedPath }}</span>
+        </el-tooltip>
       </div>
     </template>
-    <el-scrollbar class="code-container">
+    <el-scrollbar class="code-container" max-height="200px">
+      <!-- weirdly, setting max-height in <style> would cause the 
+      horizontal scroll bar moving vertically with vertical scroll... -->
       <pre><code v-html="highlightedCode"></code></pre>
     </el-scrollbar>
   </el-card>
@@ -24,6 +31,7 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
 import rust from 'highlight.js/lib/languages/rust';
 import typescript from 'highlight.js/lib/languages/typescript';
+import { basename } from 'path-browserify';
 
 const registerLanguages = () => {
   hljs.registerLanguage('c', c);
@@ -57,6 +65,9 @@ export default {
     highlightedCode() {
       return this.highlightCode(this.code);
     },
+    trimmedPath() {
+      return basename(this.path)
+    }
   },
   methods: {
     highlightCode(code) {
@@ -77,11 +88,6 @@ export default {
 .el-card:deep(.el-card__header) {
   padding: 5px 10px;
   color: var(--vscode-input-foreground)
-}
-
-.el-scrollbar {
-  max-height: 200px;
-  overflow: auto;
 }
 
 .file-path {
