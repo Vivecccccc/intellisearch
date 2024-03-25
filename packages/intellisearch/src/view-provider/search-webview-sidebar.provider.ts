@@ -40,6 +40,7 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
     };
     webviewView.webview.html = await this.getWebviewHtml(webviewView.webview);
     this.registerLoginListener();
+    this.registerLogoutListener();
     this.registerLoadMoreListener();
   }
 
@@ -59,6 +60,7 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
         }
         const credential = await getCredential(password, otp);
         if (credential) {
+          this.context.globalState.update('token', credential.token);
           this._view?.webview.postMessage({ 
             command: "loginSuccess", 
             credential: { userId: credential.userId, expiry: credential.expiry }
@@ -66,6 +68,14 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
         } else {
           return;
         }
+      }
+    });
+  }
+
+  registerLogoutListener() {
+    this._view?.webview.onDidReceiveMessage(async (data) => {
+      if (data.command === "logout") {
+        this.context.globalState.update('token', null);
       }
     });
   }
@@ -103,12 +113,14 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
         }
       }
     }
-    this.postMethodsToWebview([MethodKind.fromOthers, MethodKind.fromSearch], methodsToBeHidden, false);
   }
 
   public loadMoreMethodsFromPool(numOfMethods: number) {
     const methodsToBeShown: MethodToShow[] = [];
     let count = 0;
+    if (this.methodPool.size === 0) {
+      return;
+    }
     for (const [_, method] of this.methodPool) {
       if (!method.shown) {
         methodsToBeShown.push(method);
@@ -122,17 +134,19 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
     this.postMethodsToWebview([MethodKind.fromOthers], methodsToBeShown, true);
   }
 
-  public postMethodsToWebview(kinds: MethodKind[], methods: MethodToShow[], addOp: boolean) {
+  private postMethodsToWebview(kinds: MethodKind[], methods: MethodToShow[], addOp: boolean): Promise<boolean> {
+    if (!this._view) {
+      return Promise.reject(new Error("WebView is not available"));
+    }
+  
     const message = {
       command: "updateMethods",
       kinds: kinds,
       methods: methods,
       addOp: addOp
     };
-    if (this._view) {
-      this._view.webview.postMessage(message);
-    }
+  
+    return Promise.resolve(this._view.webview.postMessage(message));
   }
-
   // TODO implement logic to send notification if there is any new method
 }

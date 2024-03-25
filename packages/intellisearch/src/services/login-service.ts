@@ -26,5 +26,4 @@ export function getCredential(password: string, otp: string): Credential | Promi
     vscode.window.showErrorMessage(`Login failed due to ${error}`);
     return null;
   });
-  return credential;
 }

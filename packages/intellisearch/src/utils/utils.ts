@@ -86,6 +86,7 @@ export async function pickLang(context: vscode.ExtensionContext): Promise<string
         defaultLang +
         "]."
     );
+    context.globalState.update("pickedLang", defaultLang);
     return defaultLang;
   }
   targetLang = languagesMap.get(targetLang) as string;

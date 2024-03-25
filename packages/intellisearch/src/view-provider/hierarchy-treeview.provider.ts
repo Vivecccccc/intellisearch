@@ -86,7 +86,7 @@ export class HierachyTreeProvider
   ) {
     
     this.filesSnapshot = this.getConcernedFiles();
-    this.updateMethodsSnapshot();
+    this.cleanMethodsSnapshot();
     this.hierarchyTreeView = vscode.window.createTreeView(
       "intellisearch.hierarchy",
       { treeDataProvider: this }
@@ -101,7 +101,7 @@ export class HierachyTreeProvider
 
   refresh(): void {
     this.filesSnapshot = this.getConcernedFiles();
-    this.updateMethodsSnapshot();
+    this.cleanMethodsSnapshot();
     if (this.hierarchyTreeView) {
       this.hierarchyTreeView.badge = {
         value: this.filesSnapshot.length,
@@ -318,7 +318,7 @@ export class HierachyTreeProvider
     });
   }
 
-  private updateMethodsSnapshot() {
+  private cleanMethodsSnapshot() {
     // clean the previous methods if its file is not in the current filesSnapshot
     const removedParsedMethods = new Map<string, Method[]>();
     this.methodsSnapshot.forEach((methods, uri) => {

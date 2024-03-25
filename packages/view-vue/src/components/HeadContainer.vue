@@ -62,10 +62,30 @@ export default {
       const message = event.data;
       this.fetchLoginCredential(message)
     });
+    if (!this.userId || !this.expiry) {
+      this.login();
+    }
   },
   beforeUnmount() {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+    }
+  },
+  // watch for userId and expiry changing to '' and 0
+  watch: {
+    userId: function (newVal, oldVal) {
+      if (newVal === '' && oldVal !== '') {
+        vscodeApi.postMessage({
+          command: 'logout'
+        });
+      }
+    },
+    expiry: function (newVal, oldVal) {
+      if (newVal === 0 && oldVal !== 0) {
+        vscodeApi.postMessage({
+          command: 'logout'
+        });
+      }
     }
   }
 };
@@ -78,10 +98,10 @@ export default {
       <el-avatar v-else> {{ userId }} </el-avatar>
     </div>
     <el-input type="textarea" class="search-bar" v-model="searchQuery" placeholder="Search..." :autosize="{minRows:1, maxRows:4}" resize="none"></el-input>
-    <!-- <el-button color="#FF3333">Search</el-button> -->
     <el-button
       v-loading.fullscreen.lock="fullscreenLoading"
       type="primary"
+      :disabled="!userId"
       @click="openFullScreen" element-loading-background="rgba(122, 122, 122, 0.4)" class="search-button">Search</el-button>
   </div>
 </template>

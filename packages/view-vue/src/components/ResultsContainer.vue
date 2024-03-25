@@ -1,15 +1,10 @@
 <template>
   <el-container class="results-container">
     <el-main>
-      <el-card v-if="searchResults.length > 0" class="results-wrapper-upper">
-        <FunctionContainer v-for="result in searchResults" :key="result.id" :code="result.code" :path="result.path" :lang="result.lang"/>
+      <el-card v-if="searchResults.length > 0" v-infinite-scroll="loadMore" infinite-scroll-distance="20" class="results-wrapper-upper">
+        <FunctionContainer v-for="result in searchResults" :key="result.hash" :code="result.code"  :path="result.path" :lang="result.lang"/>
       </el-card>
-      <p v-else>No search results</p>
-      <el-divider content-position="left">Other Functions</el-divider>
-      <el-card v-if="items.length > 0" v-infinite-scroll="loadMore" infinite-scroll-distance="20" class="results-wrapper-lower">
-        <FunctionContainer v-for="item in items" :key="item.hash" :code="item.code" :path="item.path" :lang="item.lang"/>
-      </el-card>
-      <p v-else>No other methods</p>
+      <el-divider v-else content-position="left">No Search Results</el-divider>
     </el-main>
   </el-container>
 </template>
@@ -26,13 +21,7 @@ export default {
   },
   data() {
     return {
-      // Mock data for search results
-      searchResults: [
-        { hash: 1, code: 'var a = b + 1', path: '/path-to-code-1', lang: 'javascript' },
-        { hash: 2, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: '/path-to-code-2', lang: 'javascript' },
-      ],
-      // Mock data for items that could be loaded
-      items: [],
+      searchResults: [],
       busy: false,
       loadingState: null,
     };
@@ -45,55 +34,49 @@ export default {
       this.loadingState = ElLoading.service({
         lock: true,
         text: 'Loading',
-        background: 'rgba(122, 122, 122, 0.4)'
+        background: 'rgba(122, 122, 122, 0.25)',
       })
       vscodeApi.postMessage({ command: 'loadMore', numOfMethods: 5 });
-      // setTimeout(() => {
-      //   let newItems = [];
-      //   for(let i = 0; i < 2; i++) {
-      //     newItems.push({ id: this.items.length + i, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: `/path-to-code-${this.items.length + i}`, lang: 'javascript'});
-      //   }
-      //   this.items = [...this.items, ...newItems];
-      //   this.busy = false;
-      //   loading.close()
-      // }, 1000);
     },
     fetchMethods(msg) {
       const command = msg.command;
       if (command === 'updateMethods') {
-        const { kinds, methods, addOp } = msg;
+        const { methods, addOp } = msg;
         methods.forEach(methodElem => {
-          if (kinds.includes(0)) {
-            this.operateData(methodElem, this.items, addOp)
-          }
-          if (kinds.includes(1)) {
-            this.operateData(methodElem, this.searchResults, addOp)
-          }
-        })
-      }
+          this.operateData(methodElem, addOp)
+        });
+      };
     },
-    operateData(methodElem, container, addOp) {
+    operateData(methodElem, addOp) {
       const { hash, filePath, method, shown, lang } = methodElem;
       const methodFull = method.full;
       if (addOp && shown) {
-        container.push({ hash, code: methodFull, path: filePath, lang });
+        this.searchResults.push({ hash, code: methodFull, path: filePath, lang });
       } 
       else if (!addOp && !shown) {
-        const index = container.findIndex(item => item.hash === hash);
-        container.splice(index, 1);
+        const index = this.searchResults.findIndex(item => item.hash === hash);
+        this.searchResults.splice(index, 1);
       }
     }
   },
   mounted() {
     window.addEventListener('message', event => {
       const message = event.data;
-      this.fetchMethods(message);
-      this.busy = false;
-      this.loadingState.close();
+      const loadingStateInstance = this.loadingState;
+      // take an arbitrary break...
+      const timeout = Math.random() * 1.3 + 0.2;
+      setTimeout(() => {
+        this.fetchMethods(message);
+        if (loadingStateInstance !== null) {
+          console.log(this.busy)
+          this.busy = false;
+          loadingStateInstance.close();
+        }
+      }, timeout * 1000);
     });
     this.loadMore();
-  }
-};
+  },
+}
 </script>
 
 <style scoped>
@@ -123,12 +106,5 @@ export default {
   box-shadow: -5px -5px 10px rgba(0, 0, 0, 0.12), /* 加深左上角阴影 */
   5px -5px 10px rgba(0, 0, 0, 0.12), /* 加深右上角阴影 */
   0px -3px 5px rgba(0, 0, 0, 0.12) !important;   /* 微小但加深的向上阴影 */
-}
-.results-wrapper-lower {
-  background-color: transparent;
-  border: none;
-  box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.12), /* 加深左下角阴影 */
-  5px 5px 10px rgba(0, 0, 0, 0.12), /* 加深右下角阴影 */
-  0px 3px 5px rgba(0, 0, 0, 0.12) !important;   /* 微小但加深的向下阴影 */ 
 }
 </style>

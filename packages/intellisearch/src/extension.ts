@@ -134,8 +134,8 @@ export function activate(context: vscode.ExtensionContext) {
   const disposableParseAll = vscode.commands.registerCommand(
     "intellisearch.parseAll",
     async () => {
-      hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
       vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
+      hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
     }
   );
 

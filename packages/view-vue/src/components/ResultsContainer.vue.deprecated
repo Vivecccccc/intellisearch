@@ -1,0 +1,142 @@
+<template>
+  <el-container class="results-container">
+    <el-main>
+      <el-card v-if="searchResults.length > 0" class="results-wrapper-upper">
+        <FunctionContainer v-for="result in searchResults" :key="result.id" :code="result.code" :path="result.path" :lang="result.lang"/>
+      </el-card>
+      <p v-else>No search results</p>
+      <el-divider content-position="left">Other Functions</el-divider>
+      <el-card v-if="items.length > 0" v-infinite-scroll="loadMore" infinite-scroll-distance="20" class="results-wrapper-lower">
+        <FunctionContainer v-for="item in items" :key="item.hash" :code="item.code" :path="item.path" :lang="item.lang"/>
+      </el-card>
+      <p v-else>No other methods</p>
+    </el-main>
+  </el-container>
+</template>
+
+<script>
+import FunctionContainer from './FunctionContainer.vue';
+import { ElLoading } from 'element-plus';
+
+import { vscodeApi } from '../App.vue';
+
+export default {
+  components: {
+    FunctionContainer,
+  },
+  data() {
+    return {
+      // Mock data for search results
+      searchResults: [
+        { hash: 1, code: 'var a = b + 1', path: '/path-to-code-1', lang: 'javascript' },
+        { hash: 2, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: '/path-to-code-2', lang: 'javascript' },
+      ],
+      // Mock data for items that could be loaded
+      items: [],
+      busy: false,
+      loadingState: null,
+    };
+  },
+  methods: {
+    loadMore() {
+      console.log(this.busy)
+      if (this.busy) return;
+      this.busy = true;
+      this.loadingState = ElLoading.service({
+        lock: true,
+        text: 'Loading',
+        background: 'rgba(122, 122, 122, 0.4)'
+      })
+      vscodeApi.postMessage({ command: 'loadMore', numOfMethods: 5 });
+      // setTimeout(() => {
+      //   let newItems = [];
+      //   for(let i = 0; i < 2; i++) {
+      //     newItems.push({ id: this.items.length + i, code: 'import Prism from \'prismjs\'; \nimport \'prismjs/themes/prism.css\';', path: `/path-to-code-${this.items.length + i}`, lang: 'javascript'});
+      //   }
+      //   this.items = [...this.items, ...newItems];
+      //   this.busy = false;
+      //   loading.close()
+      // }, 1000);
+    },
+    fetchMethods(msg) {
+      const command = msg.command;
+      if (command === 'updateMethods') {
+        const { kinds, methods, addOp } = msg;
+        methods.forEach(methodElem => {
+          if (kinds.includes(0)) {
+            this.operateData(methodElem, this.items, addOp)
+          }
+          if (kinds.includes(1)) {
+            this.operateData(methodElem, this.searchResults, addOp)
+          }
+        })
+      }
+    },
+    operateData(methodElem, container, addOp) {
+      const { hash, filePath, method, shown, lang } = methodElem;
+      const methodFull = method.full;
+      if (addOp && shown) {
+        container.push({ hash, code: methodFull, path: filePath, lang });
+      } 
+      else if (!addOp && !shown) {
+        const index = container.findIndex(item => item.hash === hash);
+        container.splice(index, 1);
+      }
+    }
+  },
+  mounted() {
+    window.addEventListener('message', event => {
+      const message = event.data;
+      this.fetchMethods(message);
+      this.busy = false;
+      this.loadingState.close();
+    });
+    this.loadMore();
+  },
+  watch: {
+    items(newItems) {
+      if (newItems.length > 0) {
+        this.busy = false;
+        this.loadingState.close();
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+.results-container {
+  margin-top: 0px;
+}
+
+.boundary-line {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.el-divider:deep(.el-divider__text) {
+  background-color: var(--vscode-sideBar-background);
+  color: var(--vscode-editor-foreground);
+  font-weight: bold;
+}
+.el-divider--horizontal {
+  border-top: 1.5px var(--vscode-editor-foreground) solid;
+}
+.el-card {
+  border-radius: 10px;
+}
+.results-wrapper-upper {
+  background-color: transparent;
+  border: none;
+  box-shadow: -5px -5px 10px rgba(0, 0, 0, 0.12), /* 加深左上角阴影 */
+  5px -5px 10px rgba(0, 0, 0, 0.12), /* 加深右上角阴影 */
+  0px -3px 5px rgba(0, 0, 0, 0.12) !important;   /* 微小但加深的向上阴影 */
+}
+.results-wrapper-lower {
+  background-color: transparent;
+  border: none;
+  box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.12), /* 加深左下角阴影 */
+  5px 5px 10px rgba(0, 0, 0, 0.12), /* 加深右下角阴影 */
+  0px 3px 5px rgba(0, 0, 0, 0.12) !important;   /* 微小但加深的向下阴影 */ 
+}
+</style>
