@@ -1,14 +1,14 @@
 import { Method } from "../parser/parser";
 import { LocalIndex } from "vectra";
 import * as vscode from "vscode";
+import { getEmbeddings } from "../services/infer-service";
 
 export async function getIndex(
-  pickedLang: string,
   context: vscode.ExtensionContext
 ): Promise<LocalIndex> {
 
   let indexPath: string;
-
+  const pickedLang = context.globalState.get("pickedLang") as string | undefined;
   switch (pickedLang) {
     case "c":
       indexPath = vscode.Uri.joinPath(
@@ -77,14 +77,10 @@ export async function getIndex(
   });
 }
 
-export class MethodWithEmbedding extends Method {
-  embedding: number[];
-
-  constructor(method: Method, embedding: number[]) {
-    super(method.name, method.full, method.position);
-    this.embedding = embedding;
-  }
-}
+export type MethodMeta = {
+  method: Method,
+  hash: string
+};
 
 export class Librarian {
   index: LocalIndex;
@@ -92,16 +88,39 @@ export class Librarian {
   constructor(index: LocalIndex) {
     this.index = index;
   }
+  
+  private checkMethodExists = async (methodHash: string): Promise<boolean> => {
+    return this.index.getItem(methodHash).then((item) => item ? true : false);
+  };
+  
+  public async addMethods(methodMetas: MethodMeta[], context: vscode.ExtensionContext): Promise<Map<string, string[]>> {
+    
+    let methodHashes = methodMetas.map((methodMeta) => methodMeta.hash.split('-')[1]);
+    const hashesWithinScope: Map<string, string[]> = new Map(methodHashes.map(hash => [hash, []]));
 
-  async addMethod(method: MethodWithEmbedding): Promise<boolean> {
-    return this.index.insertItem({ 
-      vector: method.embedding, 
-      metadata: method.name,  
-    })
-    .then(() => true)
-    .catch((err) => {
-      console.error('Failed to add method due to', err);
-      return false;
-    });
+    const existedIndices: Set<number> = new Set();
+
+    for (let index = 0; index < methodHashes.length; index++) {
+      const methodHash = methodHashes[index];
+      if (await this.checkMethodExists(methodHash)) {
+        hashesWithinScope.get(methodHash)!.push(methodMetas[index].hash);
+        existedIndices.add(index);
+      }
+    }
+
+    methodHashes = methodHashes.filter((_, index) => !existedIndices.has(index));
+    methodMetas = methodMetas.filter((_, index) => !existedIndices.has(index));
+
+    for (let index = 0; index < methodMetas.length; index++) {
+      const methodMeta = methodMetas[index];
+      const embedding = await getEmbeddings([methodMeta.method.full], 0, context);
+      this.index.insertItem({
+        id: methodHashes[index],
+        vector: embedding[0],
+      });
+      hashesWithinScope.get(methodHashes[index])!.push(methodMeta.hash);
+    }
+    return hashesWithinScope;
   }
+
 }

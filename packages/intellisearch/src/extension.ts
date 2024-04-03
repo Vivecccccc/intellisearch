@@ -138,7 +138,7 @@ export function activate(context: vscode.ExtensionContext) {
       hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
     }
   );
-
+  // deprecated
   const disposableNotifyWebview = vscode.commands.registerCommand(
     "intellisearch.notifyWebview",
     (methods: Map<string, Method[]>, addOp: boolean) => {

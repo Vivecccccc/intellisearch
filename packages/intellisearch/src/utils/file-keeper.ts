@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { Method } from '../parser/parser';
+import { sha256Hash } from './utils';
 
 type FileElem = {
   fileHash: string,
@@ -28,8 +29,7 @@ export class FileKeeper {
 
   checkFileUpdate(path: string): { flag: boolean, fileContent: string, fileElem: FileElem } {
     const fileContent = fs.readFileSync(path, 'utf-8');
-    const hasher = crypto.createHash('sha256');
-    const hash = hasher.update(fileContent).digest('hex');
+    const hash = sha256Hash(fileContent);
     if (this.files.has(path) && this.files.get(path)!.fileHash === hash) {
       return { flag: false, fileContent: fileContent, fileElem: this.files.get(path)! };
     }

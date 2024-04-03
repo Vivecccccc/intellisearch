@@ -138,7 +138,7 @@ export class HierachyTreeProvider
             );
           })
           .map((child) => {
-            let uri = vscode.Uri.file(path.join(element.uri.fsPath, child));
+            const uri = vscode.Uri.file(path.join(element.uri.fsPath, child));
             // get the path execpt for the basename of the file
             const prefix = element.uri.fsPath + path.sep;
             const isChildDir = fs.statSync(uri.fsPath).isDirectory();
@@ -154,7 +154,7 @@ export class HierachyTreeProvider
           });
         return Promise.resolve(children);
       } else {
-        let methods = this.methodsSnapshot.get(element.uri.fsPath);
+        const methods = this.methodsSnapshot.get(element.uri.fsPath);
         if (methods) {
           return methods.map(
             (method) =>
@@ -219,7 +219,7 @@ export class HierachyTreeProvider
   }
 
   private getConcernedFiles(): string[] {
-    let files: string[] = [];
+    const files: string[] = [];
     this.folders = this.folders.filter(
       (folder) => !isIgnoredFolder(folder)
     );

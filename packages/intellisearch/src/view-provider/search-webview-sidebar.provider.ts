@@ -32,6 +32,10 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
     super(context);
   }
 
+  public getView() {
+    return this._view ? this._view : null;
+  }
+
   async resolveWebviewView(webviewView: WebviewView) {
     this._view = webviewView;
     webviewView.webview.options = {
