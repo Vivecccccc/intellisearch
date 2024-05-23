@@ -8,7 +8,7 @@ export async function getIndex(
 ): Promise<LocalIndex> {
 
   let indexPath: string;
-  const pickedLang = context.globalState.get("pickedLang") as string | undefined;
+  const pickedLang = context.workspaceState.get("pickedLang") as string | undefined;
   switch (pickedLang) {
     case "c":
       indexPath = vscode.Uri.joinPath(

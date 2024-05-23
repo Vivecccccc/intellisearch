@@ -110,7 +110,7 @@ export class SearchViewProvider extends AbstractViewProvider implements WebviewV
             filePath: normalize(filePath),
             method: method,
             shown: false,
-            lang: this.context.globalState.get('pickedLang'),
+            lang: this.context.workspaceState.get('pickedLang'),
           });
         } else {
           this.methodPool.delete(parsedMethodHash);
