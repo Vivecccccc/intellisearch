@@ -1,24 +1,27 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import * as fs from "fs";
 import Parser from "web-tree-sitter";
 
 import { SearchViewProvider } from "./view-provider/search-webview-sidebar.provider";
-import { HierachyTreeItem, HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
-import { pickLang, removeSubFolders } from "./utils/utils";
+import { HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
+import { pickLang } from "./utils/utils";
 import { Method, getParser } from "./parser/parser";
 import { langRouter } from "./parser/lang-adapter";
 import { FileKeeper } from "./utils/file-keeper";
 
+import { registerWorkspaceListeners } from "./workspace-listeners";
+
 let fileKeeper: FileKeeper = new FileKeeper();
 let fileKeeperStorage: string;
+let hierarchyTreeProvider: HierachyTreeProvider;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  if (!vscode.workspace.workspaceFolders) {
+    return;
+  }
   let pickedLang: string;
-  let hierarchyTreeProvider: HierachyTreeProvider;
   let parser: Parser;
-  
+
   // see if the global storage dir exists
   if (!fs.existsSync(context.globalStorageUri.fsPath)) {
     fs.mkdirSync(context.globalStorageUri.fsPath);
@@ -34,83 +37,45 @@ export function activate(context: vscode.ExtensionContext) {
     searchViewProvider,
     { webviewOptions: { retainContextWhenHidden: true } }
   );
-  
+
   const disposableSelectLanguage = vscode.commands.registerCommand(
     "intellisearch.selectLang",
     async () => {
-      pickedLang = await pickLang(context);
+      let newPickedLang = await pickLang(context);
       if (hierarchyTreeProvider) {
-        hierarchyTreeProvider.pickedLang = pickedLang;
+        hierarchyTreeProvider.pickedLang = newPickedLang;
         hierarchyTreeProvider.refresh();
       }
+      return newPickedLang;
     }
   );
 
-  const disposableAddFolders = vscode.commands.registerCommand(
-    "intellisearch.addFolders",
+  const disposableInitFromWorkspace = vscode.commands.registerCommand(
+    "intellisearch.initFromWorkspace",
     async () => {
-      const uris = await vscode.window.showOpenDialog({
-        canSelectFiles: false,
-        canSelectFolders: true,
-        canSelectMany: true,
-        openLabel: "Add Folders",
-      });
-      if (uris && !pickedLang) {
-        pickedLang = await pickLang(context);
+      const uris =
+        vscode.workspace.workspaceFolders?.map((folder) => folder.uri) || [];
+      if (!uris) {
+        vscode.window.showErrorMessage("Please open a folder to workspace first");
+        return;
       }
-
-      if (uris && uris.length) {
-        if (hierarchyTreeProvider) {
-          hierarchyTreeProvider.folders.push(...uris);
-          hierarchyTreeProvider.pickedLang = pickedLang;
-          // remove duplicates
-          const uniqueFolders = Array.from(
-            new Set(hierarchyTreeProvider.folders.map((folder) => folder.fsPath))
-          ).map((fsPath) => vscode.Uri.file(fsPath));
-          // const filteredFolders = uniqueFolders.filter(folder1 => !uniqueFolders.some(folder2 => folder1.fsPath.startsWith(folder2.fsPath + path.sep)));
-          const filteredFolders = removeSubFolders(uniqueFolders);
-          hierarchyTreeProvider.folders = filteredFolders;
-          hierarchyTreeProvider.refresh();
-        } else {
-          hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang, searchViewProvider);
-        }
+      if (!pickedLang) {
+        pickedLang = await vscode.commands.executeCommand("intellisearch.selectLang");
       }
+      hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang, searchViewProvider);
+      let workspaceListeners = registerWorkspaceListeners(hierarchyTreeProvider);
+      context.subscriptions.push(...workspaceListeners);
     }
   );
 
-  const disposableClearFolders = vscode.commands.registerCommand(
-    "intellisearch.clearFolders",
-    () => {
-      if (hierarchyTreeProvider) {
-        hierarchyTreeProvider.folders = [];
-        hierarchyTreeProvider.refresh();
-      }
-    }
-  );
-
-  const disposableRemoveFolder = vscode.commands.registerCommand(
-    "intellisearch.removeFolder",
-    (hierarchyItem: HierachyTreeItem) => {
-      if (hierarchyTreeProvider) {
-        hierarchyTreeProvider.folders = hierarchyTreeProvider.folders.filter(
-          (f) => f.fsPath !== hierarchyItem.uri.fsPath
-        );
-        hierarchyTreeProvider.refresh();
-      }
-    }
-  );
-
-  const disposableParseFile = vscode.commands.registerCommand(
+	const disposableParseFile = vscode.commands.registerCommand(
     "intellisearch.parseFile",
     async (files: string[] | undefined) => {
-      if (!pickedLang) {
-        pickedLang = await pickLang(context);
-      }
-      parser = await getParser(pickedLang, context);
+      parser = await getParser(pickedLang!, context);
 
       const concernedFiles = files ? files : [];
 
-      const lumberjack = langRouter(pickedLang, parser);
+      const lumberjack = langRouter(pickedLang!, parser);
       // initialize a dictionary to store the parsed methods and their file paths
       const parsedMethods: Map<string, { flag: boolean, methods: Method[] }> = new Map();
       for (let i = 0; i < concernedFiles.length; i++) {
@@ -131,11 +96,15 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const disposableParseAll = vscode.commands.registerCommand(
+	const disposableParseAll = vscode.commands.registerCommand(
     "intellisearch.parseAll",
     async () => {
-      vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
-      hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
+			if (hierarchyTreeProvider) {
+				vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
+				hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
+			} else {
+				vscode.window.showErrorMessage("Please initialize the workspace first");
+    }
     }
   );
   // deprecated
@@ -146,23 +115,37 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(
-    ...[
-      searchViewDisposable,
-      disposableAddFolders,
-      disposableClearFolders,
-      disposableRemoveFolder,
+  if (context.workspaceState.get("pickedLang")) {
+    pickedLang = context.workspaceState.get("pickedLang") as string;
+    await vscode.commands.executeCommand('setContext', 'intellisearch.workspaceYetPickedLang', false);
+    await vscode.commands.executeCommand('intellisearch.initFromWorkspace');
+  } else {
+    await vscode.commands.executeCommand('setContext', 'intellisearch.workspaceYetPickedLang', true);
+  }
+
+	context.subscriptions.push(
+		...[
+			searchViewDisposable,
       disposableSelectLanguage,
-      disposableParseFile,
-      disposableParseAll,
-      disposableNotifyWebview,
-    ]
-  );
+      disposableInitFromWorkspace,
+			disposableParseFile,
+			disposableParseAll
+		]
+	);
+  if (hierarchyTreeProvider! && hierarchyTreeProvider.hierarchyTreeView) {
+    context.subscriptions.push(hierarchyTreeProvider.hierarchyTreeView);
+  }
+
 }
 
-// this method is called when your extension is deactivated
-export function deactivate(context: vscode.ExtensionContext) {
+export async function deactivate() {
+  let rootPath = fileKeeperStorage?.split('/').slice(0, -1).join('/');
+  fs.writeFileSync(rootPath + '/start.txt', '');
   if (fileKeeperStorage) {
     fileKeeper.serialize(fileKeeperStorage);
   }
+  if (hierarchyTreeProvider && hierarchyTreeProvider.hierarchyTreeView) {
+    hierarchyTreeProvider.hierarchyTreeView.badge = undefined;
+  }
+  fs.writeFileSync(rootPath + '/end.txt', '');
 }

@@ -1,5 +1,6 @@
 {
   "name": "intellisearch",
+  "publisher": "vivec",
   "displayName": "intelliSearch",
   "description": "",
   "version": "0.0.1",
@@ -9,24 +10,15 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    
+  ],
   "main": "./out/intellisearch/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "intellisearch.addFolders",
-        "title": "Add Folders",
-        "icon": "$(plus)"
-      },
-      {
-        "command": "intellisearch.removeFolder",
-        "title": "Remove Folder",
-        "icon": "$(minus)"
-      },
-      {
-        "command": "intellisearch.clearFolders",
-        "title": "Remove All Folders",
-        "icon": "$(trash)"
+        "command": "intellisearch.initFromWorkspace",
+        "title": "Initialize from Workspace"
       },
       {
         "command": "intellisearch.selectLang",
@@ -70,7 +62,13 @@
     "viewsWelcome": [
       {
         "view": "intellisearch.hierarchy",
-        "contents": "No folders being selected. \n [Add Folders](command:intellisearch.addFolders)"
+        "contents": "Open Folder to Workspace \n [Open Folder](command:vscode.openFolder)",
+        "when": "workspaceFolderCount == 0"
+      },
+      {
+        "view": "intellisearch.hierarchy",
+        "contents": "Select a Language for Parsing \n [Select Language](command:intellisearch.initFromWorkspace)",
+        "when": "workspaceFolderCount > 0 && intellisearch.workspaceYetPickedLang == true"
       }
     ],
     "configuration": {
@@ -119,16 +117,6 @@
     "menus": {
       "view/title": [
         {
-          "command": "intellisearch.addFolders",
-          "when": "view == intellisearch.hierarchy",
-          "group": "navigation"
-        },
-        {
-          "command": "intellisearch.clearFolders",
-          "when": "view == intellisearch.hierarchy",
-          "group": "navigation"
-        },
-        {
           "command": "intellisearch.selectLang",
           "when": "view == intellisearch.hierarchy",
           "group": "navigation"
@@ -136,13 +124,6 @@
         {
           "command": "intellisearch.parseAll",
           "when": "view == intellisearch.hierarchy",
-          "group": "navigation"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "intellisearch.removeFolder",
-          "when": "view == intellisearch.hierarchy && viewItem == rootDir",
           "group": "navigation"
         }
       ]
