@@ -5,7 +5,7 @@ import * as fs from "fs";
 import Parser from "web-tree-sitter";
 
 import { SearchViewProvider } from "./view-provider/search-webview-sidebar.provider";
-import { HierachyTreeItem, HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
+import { HierarchyTreeItem, HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
 import { pickLang, removeSubFolders } from "./utils/utils";
 import { Method, getParser } from "./parser/parser";
 import { langRouter } from "./parser/lang-adapter";
@@ -90,7 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const disposableRemoveFolder = vscode.commands.registerCommand(
     "intellisearch.removeFolder",
-    (hierarchyItem: HierachyTreeItem) => {
+    (hierarchyItem: HierarchyTreeItem) => {
       if (hierarchyTreeProvider) {
         hierarchyTreeProvider.folders = hierarchyTreeProvider.folders.filter(
           (f) => f.fsPath !== hierarchyItem.uri.fsPath

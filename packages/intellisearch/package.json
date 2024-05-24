@@ -34,6 +34,11 @@
         "command": "intellisearch.parseAll",
         "title": "Parse All",
         "icon": "$(play)"
+      },
+      {
+        "command": "intellisearch.refreshTreeView",
+        "title": "Refresh Hierarchy View",
+        "icon": "$(sync)"
       }
     ],
     "viewsContainers": {
@@ -123,6 +128,11 @@
         },
         {
           "command": "intellisearch.parseAll",
+          "when": "view == intellisearch.hierarchy",
+          "group": "navigation"
+        },
+        {
+          "command": "intellisearch.refreshTreeView",
           "when": "view == intellisearch.hierarchy",
           "group": "navigation"
         }

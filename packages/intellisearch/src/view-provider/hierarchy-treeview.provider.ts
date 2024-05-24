@@ -7,7 +7,7 @@ import { decideLanguageFromUri } from "../utils/utils";
 import { Method } from "../parser/parser";
 import { SearchViewProvider } from "./search-webview-sidebar.provider";
 
-export class HierachyTreeItem extends vscode.TreeItem {
+export class HierarchyTreeItem extends vscode.TreeItem {
   constructor(
     public readonly uri: vscode.Uri,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -45,7 +45,7 @@ export class HierachyTreeItem extends vscode.TreeItem {
   }
 }
 
-export class MethodTreeItem extends HierachyTreeItem {
+export class MethodTreeItem extends HierarchyTreeItem {
   constructor(
     public readonly uri: vscode.Uri,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -66,17 +66,18 @@ export class MethodTreeItem extends HierachyTreeItem {
 }
 
 export class HierachyTreeProvider
-  implements vscode.TreeDataProvider<HierachyTreeItem>
+  implements vscode.TreeDataProvider<HierarchyTreeItem>
 {
   private _onDidChangeTreeData: vscode.EventEmitter<
-    HierachyTreeItem | undefined
-  > = new vscode.EventEmitter<HierachyTreeItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<HierachyTreeItem | undefined> =
+    HierarchyTreeItem | undefined
+  > = new vscode.EventEmitter<HierarchyTreeItem | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<HierarchyTreeItem | undefined> =
     this._onDidChangeTreeData.event;
+  private _nodeMap = new Map<string, { parent: HierarchyTreeItem | undefined, item: HierarchyTreeItem }>();
 
   filesSnapshot: string[] = [];
   methodsSnapshot: Map<string, Method[]> = new Map();
-  hierarchyTreeView: vscode.TreeView<HierachyTreeItem> | undefined = undefined;
+  hierarchyTreeView: vscode.TreeView<HierarchyTreeItem> | undefined = undefined;
   searchWebviewProvider: SearchViewProvider;
 
   constructor(
@@ -99,7 +100,7 @@ export class HierachyTreeProvider
     this.registerChangeSelectionListener();
   }
 
-  refresh(): void {
+  refresh(elements: HierarchyTreeItem[]): void {
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
     if (this.hierarchyTreeView) {
@@ -108,11 +109,17 @@ export class HierachyTreeProvider
         tooltip: `${this.filesSnapshot.length} valid files`,
       };
     }
-    this._onDidChangeTreeData.fire(undefined);
+    if (elements.length === 0) {
+      this._onDidChangeTreeData.fire(undefined);
+    } else {
+      for (let element of elements) {
+        this._onDidChangeTreeData.fire(element);
+      }
+    }
   }
 
   getTreeItem(
-    element: HierachyTreeItem
+    element: HierarchyTreeItem
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
     if (element.shouldEmphasised(element.uri, this.pickedLang)) {
       let rawLabel = element.label as string;
@@ -122,8 +129,8 @@ export class HierachyTreeProvider
   }
 
   getChildren(
-    element?: HierachyTreeItem | undefined
-  ): vscode.ProviderResult<HierachyTreeItem[]> {
+    element?: HierarchyTreeItem | undefined
+  ): vscode.ProviderResult<HierarchyTreeItem[]> {
     if (!this.folders.length) {
       return Promise.resolve([]);
     }
@@ -142,8 +149,8 @@ export class HierachyTreeProvider
             // get the path execpt for the basename of the file
             const prefix = element.uri.fsPath + path.sep;
             const isChildDir = fs.statSync(uri.fsPath).isDirectory();
-            const doesFileHaveMethods = this.methodsSnapshot.has(uri.fsPath);
-            return new HierachyTreeItem(
+            const doesFileHaveMethods = this.methodsSnapshot.has(uri.fsPath) && this.methodsSnapshot.get(uri.fsPath)!.length > 0;
+            let childItem = new HierarchyTreeItem(
               uri,
               isChildDir || doesFileHaveMethods
                 ? vscode.TreeItemCollapsibleState.Collapsed
@@ -151,6 +158,8 @@ export class HierachyTreeProvider
               prefix,
               false
             );
+            this.setNodeMap(childItem, element);
+            return childItem;
           });
         return Promise.resolve(children);
       } else {
@@ -176,13 +185,16 @@ export class HierachyTreeProvider
       const rootItems = this.folders
         .filter((folder) => !isIgnoredFolder(folder))
         .map(
-          (folder) =>
-            new HierachyTreeItem(
+          (folder) => {
+            let childItem = new HierarchyTreeItem(
               folder,
               vscode.TreeItemCollapsibleState.Collapsed,
               prefix,
               true
-            )
+            );
+            this.setNodeMap(childItem, undefined);
+            return childItem;
+          }
         );
       return Promise.resolve(rootItems);
     }
@@ -254,7 +266,7 @@ export class HierachyTreeProvider
       });
   }
 
-  private lazyInjectMethodInFile(items: HierachyTreeItem[]) {
+  private lazyInjectMethodInFile(items: HierarchyTreeItem[]) {
     let filePaths = items.map((item) => item.uri.fsPath);
     vscode.commands.executeCommand("intellisearch.parseFile", filePaths)
       .then((parsedMethodsWithFlag) => {
@@ -301,7 +313,7 @@ export class HierachyTreeProvider
               vscode.TextEditorRevealType.InCenter
             );
           });
-        } else if (item instanceof HierachyTreeItem) {
+        } else if (item instanceof HierarchyTreeItem) {
           if (!fs.statSync(item.uri.fsPath).isDirectory()) {
             vscode.window.showTextDocument(item.uri);
             if (this.filesSnapshot.includes(item.uri.fsPath)) { this.injectMethodInFile([item.uri.fsPath]); }
@@ -332,6 +344,18 @@ export class HierachyTreeProvider
     if (removedParsedMethods.size) {
       this.searchWebviewProvider.updateMethodPool(removedParsedMethods, false);
     }
+  }
+
+  setNodeMap(element: HierarchyTreeItem, parent: HierarchyTreeItem | undefined) {
+    const nodePath = element.uri.fsPath;
+    this._nodeMap.set(
+      nodePath,
+      { parent: parent, item: element }
+    );
+  }
+
+  getNodeMap(nodePath: string) {
+    return this._nodeMap.get(nodePath);
   }
 }
 
