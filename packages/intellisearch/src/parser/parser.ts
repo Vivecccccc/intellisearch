@@ -89,15 +89,36 @@ export async function getParser(
   return parser;
 }
 
-export class Method {
+export class Symbol {
   name: string;
+  position: number[][];
+  readonly range: vscode.Range;
+
+  constructor(name: string, position: number[][]) {
+    this.name = name;
+    this.position = position;
+    this.range = this.getSymbolRange();
+  }
+  
+  private getSymbolRange(): vscode.Range {
+    return new vscode.Range(
+      this.position[0][0],
+      this.position[0][1],
+      this.position[1][0],
+      this.position[1][1]
+    );
+  }
+};
+
+export class Method {
+  symbol: Symbol;
   // body: string;
   full: string;
   position: number[][];
   signature: string;
 
-  constructor(name: string, full: string, position: number[][]) {
-    this.name = name;
+  constructor(symbol: Symbol, full: string, position: number[][]) {
+    this.symbol = symbol;
     // this.body = body;
     this.full = full;
     this.position = position;
@@ -160,12 +181,18 @@ export abstract class Lumberjack {
     return methods;
   }
 
-  protected extractMethodName(node: Parser.SyntaxNode): string | null {
+  protected extractMethodName(node: Parser.SyntaxNode): Symbol | null {
     const possibleMethodNameNode = node.childForFieldName(
       this.methodNameFieldToken
     );
     if (possibleMethodNameNode) {
-      return possibleMethodNameNode.text;
+      return new Symbol(
+        possibleMethodNameNode.text, 
+        [
+          [possibleMethodNameNode.startPosition.row, possibleMethodNameNode.startPosition.column],
+          [possibleMethodNameNode.endPosition.row, possibleMethodNameNode.endPosition.column],
+        ]
+      );
     }
     return null;
   }

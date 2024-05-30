@@ -44,7 +44,7 @@ export async function activate(context: vscode.ExtensionContext) {
       let newPickedLang = await pickLang(context);
       if (hierarchyTreeProvider) {
         hierarchyTreeProvider.pickedLang = newPickedLang;
-        hierarchyTreeProvider.refresh([]);
+        await hierarchyTreeProvider.refresh([]);
       }
       return newPickedLang;
     }
@@ -63,6 +63,7 @@ export async function activate(context: vscode.ExtensionContext) {
         pickedLang = await vscode.commands.executeCommand("intellisearch.selectLang");
       }
       hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang, searchViewProvider);
+      await hierarchyTreeProvider.intelliDoc();
       let workspaceListeners = registerWorkspaceListeners(hierarchyTreeProvider);
       context.subscriptions.push(...workspaceListeners);
     }
@@ -104,7 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
 			} else {
 				vscode.window.showErrorMessage("Please initialize the workspace first");
-    }
+      }
     }
   );
 
@@ -112,7 +113,7 @@ export async function activate(context: vscode.ExtensionContext) {
     "intellisearch.refreshTreeView",
     async () => {
       if (hierarchyTreeProvider) {
-        hierarchyTreeProvider.refresh([]);
+        await hierarchyTreeProvider.refresh([]);
       }
     }
   );

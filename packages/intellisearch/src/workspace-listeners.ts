@@ -15,7 +15,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
           ).map((fsPath) => vscode.Uri.file(fsPath));
           const filteredFolders = removeSubFolders(uniqueFolders);
           hierarchyTreeProvider.folders = filteredFolders;
-          hierarchyTreeProvider.refresh([]);
+          await hierarchyTreeProvider.refresh([]);
         }
       }
     }
@@ -50,7 +50,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
             elements.push(element);
           }
         }
-        hierarchyTreeProvider.refresh(elements);
+        await hierarchyTreeProvider.refresh(elements);
       }
     }
   );
@@ -62,7 +62,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         for (const file of event.files) {
           const parent = hierarchyTreeProvider.getNodeMap(file.fsPath)?.parent;
           if (!parent) {
-            hierarchyTreeProvider.refresh([]);
+            await hierarchyTreeProvider.refresh([]);
             return;
           }
           parents.push(parent);
@@ -70,7 +70,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         if (parents.length > 0) {
           parents = deOverlap(parents, hierarchyTreeProvider);
         }
-        hierarchyTreeProvider.refresh(parents);
+        await hierarchyTreeProvider.refresh(parents);
       }
     }
   );
@@ -83,7 +83,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         for (const file of event.files) {
           const oldParent = hierarchyTreeProvider.getNodeMap(file.oldUri.fsPath)?.parent;
           if (!oldParent) {
-            hierarchyTreeProvider.refresh([]);
+            await hierarchyTreeProvider.refresh([]);
             break;
           }
           oldParents.push(oldParent);
@@ -91,7 +91,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         if (oldParents.length > 0) {
           oldParents = deOverlap(oldParents, hierarchyTreeProvider);
         }
-        hierarchyTreeProvider.refresh(oldParents);
+        await hierarchyTreeProvider.refresh(oldParents);
         
         let newPaths: string[] = [];
         let hasRootParent: boolean = false;
@@ -109,7 +109,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         } else {
           newParents = [];
         }
-        hierarchyTreeProvider.refresh(newParents);
+        await hierarchyTreeProvider.refresh(newParents);
         newPaths = newPaths.filter((path) => hierarchyTreeProvider.filesSnapshot.includes(path));
         hierarchyTreeProvider.injectMethodInFile(newPaths);
       }
@@ -125,9 +125,9 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
           hierarchyTreeProvider.injectMethodInFile([filePath]);
         }
         if (parent) {
-          hierarchyTreeProvider.refresh([parent]);
+          await hierarchyTreeProvider.refresh([parent]);
         } else {
-          hierarchyTreeProvider.refresh([]);
+          await hierarchyTreeProvider.refresh([]);
         }
       }
     }

@@ -1,6 +1,6 @@
 import Parser from "web-tree-sitter";
 
-import { Lumberjack } from "./parser";
+import { Lumberjack, Symbol } from "./parser";
 
 export class CLumberjack extends Lumberjack {
   getMethodDefinitionTokens(): string[] {
@@ -13,7 +13,7 @@ export class CLumberjack extends Lumberjack {
     return "body";
   }
 
-  extractMethodName(node: Parser.SyntaxNode): string | null {
+  extractMethodName(node: Parser.SyntaxNode): Symbol | null {
     const methodSignatureNode = node.childForFieldName("declarator");
     if (
       methodSignatureNode &&
@@ -26,7 +26,13 @@ export class CLumberjack extends Lumberjack {
         possibleMethodNameNode &&
         possibleMethodNameNode.type === "identifier"
       ) {
-        return possibleMethodNameNode.text;
+        return new Symbol( 
+          possibleMethodNameNode.text, 
+          [
+            [possibleMethodNameNode.startPosition.row, possibleMethodNameNode.startPosition.column],
+            [possibleMethodNameNode.endPosition.row, possibleMethodNameNode.endPosition.column]
+          ]
+        );
       }
     }
     return null;

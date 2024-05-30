@@ -6,6 +6,7 @@ import { minimatch } from "minimatch";
 import { decideLanguageFromUri } from "../utils/utils";
 import { Method } from "../parser/parser";
 import { SearchViewProvider } from "./search-webview-sidebar.provider";
+import { DocumentLspOperator } from "../parser/lsp-ops";
 
 export class HierarchyTreeItem extends vscode.TreeItem {
   constructor(
@@ -56,11 +57,27 @@ export class MethodTreeItem extends HierarchyTreeItem {
     super(uri, collapsibleState, prefix, isRoot);
     this.iconPath = new vscode.ThemeIcon("symbol-function");
     this.method = method;
-    this.label = method.name;
+    this.label = method.symbol.name;
     this.contextValue = "method";
   }
 
   shouldEmphasised(uri: vscode.Uri, pickedLang: string): boolean {
+    return false;
+  }
+
+  findWrapper(op: DocumentLspOperator): string | boolean {
+    const symbol = this.method.symbol;
+    const wrapper = op.getWrapper(
+      symbol,
+      [
+        vscode.SymbolKind.Class,
+        vscode.SymbolKind.Interface,
+        vscode.SymbolKind.Struct,
+      ]
+    );
+    if (wrapper) {
+      return wrapper.name;
+    }
     return false;
   }
 }
@@ -79,13 +96,13 @@ export class HierachyTreeProvider
   methodsSnapshot: Map<string, Method[]> = new Map();
   hierarchyTreeView: vscode.TreeView<HierarchyTreeItem> | undefined = undefined;
   searchWebviewProvider: SearchViewProvider;
+  yellowPages: Map<string, DocumentLspOperator> = new Map();
 
   constructor(
     public folders: vscode.Uri[],
     public pickedLang: string,
     searchWebviewProvider: SearchViewProvider
   ) {
-    
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
     this.hierarchyTreeView = vscode.window.createTreeView(
@@ -100,9 +117,10 @@ export class HierachyTreeProvider
     this.registerChangeSelectionListener();
   }
 
-  refresh(elements: HierarchyTreeItem[]): void {
+  async refresh(elements: HierarchyTreeItem[]): Promise<void> {
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
+    await this.intelliDoc(elements);
     if (this.hierarchyTreeView) {
       this.hierarchyTreeView.badge = {
         value: this.filesSnapshot.length,
@@ -124,6 +142,15 @@ export class HierachyTreeProvider
     if (element.shouldEmphasised(element.uri, this.pickedLang)) {
       let rawLabel = element.label as string;
       element.label = { highlights: [[0, rawLabel.length]], label: rawLabel };
+    }
+    if (element instanceof MethodTreeItem) {
+      let item = element as MethodTreeItem;
+      if (!item.description) {
+        let op = this.yellowPages.get(item.uri.fsPath);
+        if (op) {
+          element.description = item.findWrapper(op);
+        }
+      }
     }
     return element;
   }
@@ -235,26 +262,42 @@ export class HierachyTreeProvider
     this.folders = this.folders.filter(
       (folder) => !isIgnoredFolder(folder)
     );
-    this.folders.forEach((folder) => {
-      const getFiles = (dir: string) => {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
-          if (entry.isDirectory()) {
-            if (isIgnoredFolder(vscode.Uri.file(fullPath))) {
-              continue;
-            }
-            getFiles(fullPath);
-          } else if (
-            decideLanguageFromUri(vscode.Uri.file(fullPath)) === this.pickedLang
-          ) {
-            files.push(fullPath);
+    const getFiles = (dir: string) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (isIgnoredFolder(vscode.Uri.file(fullPath))) {
+            continue;
           }
+          getFiles(fullPath);
+        } else if (
+          decideLanguageFromUri(vscode.Uri.file(fullPath)) === this.pickedLang
+        ) {
+          files.push(fullPath);
         }
-      };
+      }
+    };
+    this.folders.forEach((folder) => {
       getFiles(folder.fsPath);
     });
     return files;
+  }
+
+  async intelliDoc(updatedParents?: HierarchyTreeItem[]): Promise<void> {
+    const shouldUpdate = (fp: string) => {
+      let flag = !updatedParents;
+      flag ||= !this.yellowPages.has(fp);
+      flag ||= updatedParents!.some((parent) => fp.startsWith(parent.uri.fsPath));
+      return flag;
+    };
+    for (const fp of this.filesSnapshot) {
+      if (shouldUpdate(fp)) {
+        const doc = new DocumentLspOperator(vscode.Uri.file(fp));
+        await doc.init();
+        this.yellowPages.set(fp, doc);
+      }
+    }
   }
 
   injectMethodInFile(paths: string[]) {
