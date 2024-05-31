@@ -23,13 +23,13 @@ export async function activate(context: vscode.ExtensionContext) {
   let parser: Parser;
 
   // see if the global storage dir exists
-  if (!fs.existsSync(context.globalStorageUri.fsPath)) {
-    fs.mkdirSync(context.globalStorageUri.fsPath);
-  }
-  fileKeeperStorage = context.globalStorageUri.fsPath + "/fileKeeper.json";
-  if (fs.existsSync(fileKeeperStorage)) {
-    fileKeeper.deserialize(fileKeeperStorage);
-  }
+  // if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+  //   fs.mkdirSync(context.globalStorageUri.fsPath);
+  // }
+  // fileKeeperStorage = context.globalStorageUri.fsPath + "/fileKeeper.json";
+  // if (fs.existsSync(fileKeeperStorage)) {
+  //   fileKeeper.deserialize(fileKeeperStorage);
+  // }
 
   const searchViewProvider: SearchViewProvider = new SearchViewProvider(context);
   const searchViewDisposable = vscode.window.registerWebviewViewProvider(
@@ -150,13 +150,13 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate() {
-  let rootPath = fileKeeperStorage?.split('/').slice(0, -1).join('/');
-  fs.writeFileSync(rootPath + '/start.txt', '');
-  if (fileKeeperStorage) {
-    fileKeeper.serialize(fileKeeperStorage);
-  }
-  if (hierarchyTreeProvider && hierarchyTreeProvider.hierarchyTreeView) {
-    hierarchyTreeProvider.hierarchyTreeView.badge = undefined;
-  }
-  fs.writeFileSync(rootPath + '/end.txt', '');
+  // let rootPath = fileKeeperStorage?.split('/').slice(0, -1).join('/');
+  // fs.writeFileSync(rootPath + '/start.txt', '');
+  // if (fileKeeperStorage) {
+  //   fileKeeper.serialize(fileKeeperStorage);
+  // }
+  // if (hierarchyTreeProvider && hierarchyTreeProvider.hierarchyTreeView) {
+  //   hierarchyTreeProvider.hierarchyTreeView.badge = undefined;
+  // }
+  // fs.writeFileSync(rootPath + '/end.txt', '');
 }

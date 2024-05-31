@@ -152,9 +152,14 @@ export class DocumentLspOperator {
 			);
 		};
 		let docSymbols = await getDocumentSymbols();
-		if (docSymbols && docSymbols[0] instanceof vscode.DocumentSymbol) {
-			docSymbols = docSymbols as vscode.DocumentSymbol[];
-			this.flatten(undefined, docSymbols);
+		if (docSymbols) {
+			if (docSymbols[0] instanceof vscode.DocumentSymbol) {
+				docSymbols = docSymbols as vscode.DocumentSymbol[];
+				this.flatten(undefined, docSymbols);
+			} else if (docSymbols[0] instanceof vscode.SymbolInformation) {
+				docSymbols = this.symInfoToDocSym(docSymbols as vscode.SymbolInformation[]);
+				this.flatten(undefined, docSymbols);
+			}
 		}
 	}
 
@@ -174,6 +179,47 @@ export class DocumentLspOperator {
 				this.flatten(s, s.children);
 			}
 		}
+	}
+
+	private symInfoToDocSym(
+		symbols: (
+			vscode.SymbolInformation & 
+			{ range?: vscode.Range, selectionRange?: vscode.Range, children?: [] }
+		)[]
+	): vscode.DocumentSymbol[] {
+		const map = new Map<string, vscode.DocumentSymbol>();
+		const roots: vscode.DocumentSymbol[] = [];
+
+		for (const symbol of symbols) {
+			let { name, containerName, kind, location, range, selectionRange, children } = symbol;
+			if (!range) {
+				range = location.range;
+			}
+			const docSymbol = new vscode.DocumentSymbol(
+				name,
+				containerName || "",
+				kind,
+				range,
+				selectionRange || range
+			);
+			if (children && children.length > 0) {
+				docSymbol.children = this.symInfoToDocSym(children);
+				roots.push(docSymbol);
+			} else {
+				if (containerName) {
+					const parent = map.get(containerName);
+					if (parent) {
+						parent.children.push(docSymbol);
+					} else {
+						roots.push(docSymbol);
+					}
+				} else {
+					roots.push(docSymbol);
+				}
+			}
+			map.set(name, docSymbol);
+		}
+		return roots;
 	}
 
 	getRef(symbol: Symbol | vscode.DocumentSymbol): vscode.DocumentSymbol | null {

@@ -120,7 +120,11 @@ export class HierachyTreeProvider
   async refresh(elements: HierarchyTreeItem[]): Promise<void> {
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
-    await this.intelliDoc(elements);
+    if (elements.length === 0) {
+      await this.intelliDoc();
+    } else {
+      await this.intelliDoc(elements);
+    }
     if (this.hierarchyTreeView) {
       this.hierarchyTreeView.badge = {
         value: this.filesSnapshot.length,
@@ -139,20 +143,7 @@ export class HierachyTreeProvider
   getTreeItem(
     element: HierarchyTreeItem
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
-    if (element.shouldEmphasised(element.uri, this.pickedLang)) {
-      let rawLabel = element.label as string;
-      element.label = { highlights: [[0, rawLabel.length]], label: rawLabel };
-    }
-    if (element instanceof MethodTreeItem) {
-      let item = element as MethodTreeItem;
-      if (!item.description) {
-        let op = this.yellowPages.get(item.uri.fsPath);
-        if (op) {
-          element.description = item.findWrapper(op);
-        }
-      }
-    }
-    return element;
+    return this.decorateItem(element);
   }
 
   getChildren(
@@ -193,14 +184,16 @@ export class HierachyTreeProvider
         const methods = this.methodsSnapshot.get(element.uri.fsPath);
         if (methods) {
           return methods.map(
-            (method) =>
-              new MethodTreeItem(
+            (method) => {
+              const methodItem = new MethodTreeItem(
                 element.uri,
                 vscode.TreeItemCollapsibleState.None,
                 "",
                 false,
                 method
-              )
+              );
+              return this.decorateItem(methodItem);
+            }
           );
         } else {
           return Promise.resolve([]);
@@ -284,6 +277,23 @@ export class HierachyTreeProvider
     return files;
   }
 
+  private decorateItem(element: HierarchyTreeItem) {
+    if (element.shouldEmphasised(element.uri, this.pickedLang)) {
+      let rawLabel = element.label as string;
+      element.label = { highlights: [[0, rawLabel.length]], label: rawLabel };
+    }
+    if (element instanceof MethodTreeItem) {
+      let item = element as MethodTreeItem;
+      if (!item.description) {
+        let op = this.yellowPages.get(item.uri.fsPath);
+        if (op) {
+          element.description = item.findWrapper(op);
+        }
+      }
+    }
+    return element;
+  }
+
   async intelliDoc(updatedParents?: HierarchyTreeItem[]): Promise<void> {
     const shouldUpdate = (fp: string) => {
       let flag = !updatedParents;
@@ -291,13 +301,15 @@ export class HierachyTreeProvider
       flag ||= updatedParents!.some((parent) => fp.startsWith(parent.uri.fsPath));
       return flag;
     };
+    const promises = [];
     for (const fp of this.filesSnapshot) {
       if (shouldUpdate(fp)) {
         const doc = new DocumentLspOperator(vscode.Uri.file(fp));
-        await doc.init();
+        promises.push(doc.init());
         this.yellowPages.set(fp, doc);
       }
     }
+    await Promise.all(promises);
   }
 
   injectMethodInFile(paths: string[]) {
