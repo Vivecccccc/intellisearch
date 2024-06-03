@@ -82,18 +82,19 @@ export class MethodTreeItem extends HierarchyTreeItem {
   }
 }
 
+type MethodRecord = { method: Method, element: MethodTreeItem | null };
+
 export class HierachyTreeProvider
   implements vscode.TreeDataProvider<HierarchyTreeItem>
 {
   private _onDidChangeTreeData: vscode.EventEmitter<
     HierarchyTreeItem | undefined
   > = new vscode.EventEmitter<HierarchyTreeItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<HierarchyTreeItem | undefined> =
-    this._onDidChangeTreeData.event;
+  readonly onDidChangeTreeData: vscode.Event<HierarchyTreeItem | undefined> = this._onDidChangeTreeData.event;
   private _nodeMap = new Map<string, { parent: HierarchyTreeItem | undefined, item: HierarchyTreeItem }>();
 
   filesSnapshot: string[] = [];
-  methodsSnapshot: Map<string, Method[]> = new Map();
+  methodsSnapshot: Map<string, MethodRecord[]> = new Map();
   hierarchyTreeView: vscode.TreeView<HierarchyTreeItem> | undefined = undefined;
   searchWebviewProvider: SearchViewProvider;
   yellowPages: Map<string, DocumentLspOperator> = new Map();
@@ -148,7 +149,7 @@ export class HierachyTreeProvider
 
   getChildren(
     element?: HierarchyTreeItem | undefined
-  ): vscode.ProviderResult<HierarchyTreeItem[]> {
+  ) {
     if (!this.folders.length) {
       return Promise.resolve([]);
     }
@@ -181,20 +182,24 @@ export class HierachyTreeProvider
           });
         return Promise.resolve(children);
       } else {
-        const methods = this.methodsSnapshot.get(element.uri.fsPath);
-        if (methods) {
-          return methods.map(
-            (method) => {
+        const records = this.methodsSnapshot.get(element.uri.fsPath);
+        if (records) {
+          const newRecords: { method: Method, element: MethodTreeItem }[] = [];
+          const methodItems = records.map(
+            (record) => {
               const methodItem = new MethodTreeItem(
                 element.uri,
                 vscode.TreeItemCollapsibleState.None,
                 "",
                 false,
-                method
+                record.method
               );
+              newRecords.push({ method: record.method, element: methodItem });
               return this.decorateItem(methodItem);
             }
           );
+          this.methodsSnapshot.set(element.uri.fsPath, newRecords);
+          return Promise.resolve(methodItems);
         } else {
           return Promise.resolve([]);
         }
@@ -218,6 +223,14 @@ export class HierachyTreeProvider
         );
       return Promise.resolve(rootItems);
     }
+  }
+
+  getParent(element: HierarchyTreeItem): vscode.ProviderResult<HierarchyTreeItem> {
+    if (element instanceof MethodTreeItem) {
+      return this.getNodeMap(element.uri.fsPath)?.item || null;
+    }
+    const parent = this.getNodeMap(element.uri.fsPath)?.parent;
+    return parent ? parent : null;
   }
 
   private getCommonPath(): string {
@@ -312,13 +325,10 @@ export class HierachyTreeProvider
     await Promise.all(promises);
   }
 
-  injectMethodInFile(paths: string[]) {
-    vscode.commands
-      .executeCommand("intellisearch.parseFile", paths)
-      .then((parsedMethodsWithFlag) => {
-        const fileMethodMap = parsedMethodsWithFlag as Map<string, { flag: boolean, methods: Method[] }>;
-        this.setParsedMethods(fileMethodMap);
-      });
+  async injectMethodInFile(paths: string[]) {
+    const parsedMethodsWithFlag = await vscode.commands.executeCommand("intellisearch.parseFile", paths);
+    const fileMethodMap = parsedMethodsWithFlag as Map<string, { flag: boolean, methods: Method[] }>;
+    this.setParsedMethods(fileMethodMap);
   }
 
   private lazyInjectMethodInFile(items: HierarchyTreeItem[]) {
@@ -333,8 +343,11 @@ export class HierachyTreeProvider
   private setParsedMethods(parsedMethodsWithFlag: Map<string, { flag: boolean, methods: Method[] }>) {
     const newlyParsedMethods = new Map<string, Method[]>();
     for (let [filePath, fileUpdates] of parsedMethodsWithFlag.entries()) {
-      if (fileUpdates.flag || !this.methodsSnapshot.has(filePath)) { 
-        this.methodsSnapshot.set(filePath, fileUpdates.methods);
+      if (fileUpdates.flag || !this.methodsSnapshot.has(filePath)) {
+        const records: MethodRecord[] = fileUpdates.methods.map((method) => {
+          return { method: method, element: null };
+        });
+        this.methodsSnapshot.set(filePath, records);
         newlyParsedMethods.set(filePath, fileUpdates.methods);
       }
     }
@@ -371,14 +384,14 @@ export class HierachyTreeProvider
         } else if (item instanceof HierarchyTreeItem) {
           if (!fs.statSync(item.uri.fsPath).isDirectory()) {
             vscode.window.showTextDocument(item.uri);
-            if (this.filesSnapshot.includes(item.uri.fsPath)) { this.injectMethodInFile([item.uri.fsPath]); }
+            if (this.filesSnapshot.includes(item.uri.fsPath)) { await this.injectMethodInFile([item.uri.fsPath]); }
           } else {
             let children = await this.getChildren(item);
             if (!children) {
               return;
             }
             children = children.filter((child) => this.filesSnapshot.includes(child.uri.fsPath));
-            this.injectMethodInFile(children.map((child) => child.uri.fsPath));
+            await this.injectMethodInFile(children.map((child) => child.uri.fsPath));
           }
         }
       }
@@ -388,11 +401,11 @@ export class HierachyTreeProvider
   private cleanMethodsSnapshot() {
     // clean the previous methods if its file is not in the current filesSnapshot
     const removedParsedMethods = new Map<string, Method[]>();
-    this.methodsSnapshot.forEach((methods, uri) => {
+    this.methodsSnapshot.forEach((records, uri) => {
       if (!this.filesSnapshot.includes(uri)) {
         const flag = this.methodsSnapshot.delete(uri);
         if (flag) {
-          removedParsedMethods.set(uri, methods);
+          removedParsedMethods.set(uri, records.map((record) => record.method));
         }
       }
     });
@@ -411,6 +424,24 @@ export class HierachyTreeProvider
 
   getNodeMap(nodePath: string) {
     return this._nodeMap.get(nodePath);
+  }
+
+  async inspectAllElements(): Promise<number> {
+    await this.injectMethodInFile(this.filesSnapshot);
+    
+    const recursiveGetChildren = async (element: HierarchyTreeItem | undefined): Promise<number> => {
+      const children = await this.getChildren(element);
+      let count = children.length;
+      for (const child of children) {
+        if (child instanceof HierarchyTreeItem && 
+            child.collapsibleState !== vscode.TreeItemCollapsibleState.None) {
+          count += await recursiveGetChildren(child);
+        }
+      }
+      return count;
+    };
+    const totalChildren = await recursiveGetChildren(undefined);
+    return totalChildren;
   }
 }
 

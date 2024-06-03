@@ -1,4 +1,4 @@
-import { ExtensionContext, Uri, Webview, WebviewView } from "vscode";
+import { ExtensionContext, Uri, Webview, WebviewPanel, WebviewView } from "vscode";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { modifyHtml } from "html-modifier";
@@ -8,7 +8,7 @@ export abstract class AbstractViewProvider {
 
   constructor(protected context: ExtensionContext) {}
 
-  abstract resolveWebviewView(webviewView: WebviewView): void;
+  abstract resolveWebviewView(webviewView: WebviewView | WebviewPanel): void;
 
   protected async getWebviewHtml(webview: Webview) {
     const { distDir, indexPath } = {

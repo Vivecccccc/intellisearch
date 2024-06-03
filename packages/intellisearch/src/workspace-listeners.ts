@@ -111,7 +111,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         }
         await hierarchyTreeProvider.refresh(newParents);
         newPaths = newPaths.filter((path) => hierarchyTreeProvider.filesSnapshot.includes(path));
-        hierarchyTreeProvider.injectMethodInFile(newPaths);
+        await hierarchyTreeProvider.injectMethodInFile(newPaths);
       }
     }
   );
@@ -122,7 +122,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
       if (hierarchyTreeProvider) {
         const parent = hierarchyTreeProvider.getNodeMap(filePath)?.parent;
         if (hierarchyTreeProvider.filesSnapshot.includes(filePath)) {
-          hierarchyTreeProvider.injectMethodInFile([filePath]);
+          await hierarchyTreeProvider.injectMethodInFile([filePath]);
         }
         if (parent) {
           await hierarchyTreeProvider.refresh([parent]);

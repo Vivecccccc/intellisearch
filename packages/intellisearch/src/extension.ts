@@ -16,6 +16,8 @@ let fileKeeperStorage: string;
 let hierarchyTreeProvider: HierachyTreeProvider;
 
 export async function activate(context: vscode.ExtensionContext) {
+  // sleep for 5 seconds to wait for the LSP server to start
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   if (!vscode.workspace.workspaceFolders) {
     return;
   }
@@ -102,7 +104,8 @@ export async function activate(context: vscode.ExtensionContext) {
     async () => {
 			if (hierarchyTreeProvider) {
 				vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
-				hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
+				const childrenCount = await hierarchyTreeProvider.inspectAllElements();
+        vscode.window.showInformationMessage(`Inspect total ${childrenCount} elements in the workspace`);
 			} else {
 				vscode.window.showErrorMessage("Please initialize the workspace first");
       }

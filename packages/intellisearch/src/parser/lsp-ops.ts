@@ -12,8 +12,8 @@ export class SymbolExt extends Symbol {
 }
 
 export class Telecom {
-	private map: Map<string, Set<string>>;
-	constructor() { this.map = new Map(); }
+	private contacts: Map<string, Set<string>>;
+	constructor() { this.contacts = new Map(); }
 
 	static getIdentifier(item: vscode.CallHierarchyItem): string {
 		const start = item.selectionRange.start;
@@ -82,18 +82,18 @@ export class Telecom {
 	addCaller(callee: vscode.CallHierarchyItem, caller: vscode.CallHierarchyItem) {
 		const calleeId = Telecom.getIdentifier(callee);
 		const callerId = Telecom.getIdentifier(caller);
-		if (!this.map.has(calleeId)) {
-			this.map.set(calleeId, new Set());
+		if (!this.contacts.has(calleeId)) {
+			this.contacts.set(calleeId, new Set());
 		}
-		this.map.get(calleeId)?.add(callerId);
+		this.contacts.get(calleeId)?.add(callerId);
 	}
 
 	retrieveCallers(callee: vscode.CallHierarchyItem): SymbolExt[] {
 		const calleeId = Telecom.getIdentifier(callee);
-		if (!this.map.has(calleeId)) {
+		if (!this.contacts.has(calleeId)) {
 			return [];
 		}
-		const callers = Array.from(this.map.get(calleeId)!);
+		const callers = Array.from(this.contacts.get(calleeId)!);
 		return callers.map((c) => Telecom.symbolize(c)).filter(Boolean) as SymbolExt[];
 	}
 	
