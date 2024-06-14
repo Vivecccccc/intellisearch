@@ -12,8 +12,13 @@ export class SymbolExt extends Symbol {
 }
 
 export class Telecom {
-	private contacts: Map<string, Set<string>>;
+  hasInit: boolean = false;
+  private contacts: Map<string, Set<string>>;
 	constructor() { this.contacts = new Map(); }
+
+  getContacts() {
+    return this.contacts;
+  }
 
 	static getIdentifier(item: vscode.CallHierarchyItem): string {
 		const start = item.selectionRange.start;
@@ -44,29 +49,31 @@ export class Telecom {
 		}
 	}
 
+	static async prepareCallHierarchies(loc: vscode.Location): Promise<vscode.CallHierarchyItem[]> {
+		let callHierarchy = await vscode.commands.executeCommand(
+			"vscode.prepareCallHierarchy",
+			loc.uri,
+			loc.range.start
+		);
+		if (!callHierarchy) {
+			return [];
+		}
+		if (!Array.isArray(callHierarchy)) {
+			callHierarchy = [callHierarchy];
+		}
+		return callHierarchy as vscode.CallHierarchyItem[];
+	}
+
 	static async getCallers(loc: vscode.Location): Promise<vscode.CallHierarchyItem[] | null> {
-		const getCallHierarchy = async (loc: vscode.Location): Promise<vscode.CallHierarchyItem | vscode.CallHierarchyItem[] | undefined | null> => {
-			return vscode.commands.executeCommand(
-				"vscode.prepareCallHierarchy",
-				loc.uri,
-				loc.range.start
-			);
-		};
 		const getIncomingCalls = async (item: vscode.CallHierarchyItem): Promise<vscode.CallHierarchyIncomingCall[] | undefined | null> => {
 			return vscode.commands.executeCommand(
 				"vscode.provideIncomingCalls",
 				item
 			);
 		};
-		let callHierarchy = await getCallHierarchy(loc);
-		if (!callHierarchy) {
-			return null;
-		}
-		if (!Array.isArray(callHierarchy)) {
-			callHierarchy = [callHierarchy];
-		}
+		let callHierarchies = await Telecom.prepareCallHierarchies(loc);
 		const callers: vscode.CallHierarchyItem[] = [];
-		for (const item of callHierarchy) {
+		for (const item of callHierarchies) {
 			const incomingCalls = await getIncomingCalls(item);
 			if (!incomingCalls) {
 				continue;
@@ -96,9 +103,20 @@ export class Telecom {
 		const callers = Array.from(this.contacts.get(calleeId)!);
 		return callers.map((c) => Telecom.symbolize(c)).filter(Boolean) as SymbolExt[];
 	}
+
+  removeCalleeById(calleeId: string) {
+    this.contacts.delete(calleeId);
+  }
+
+  removeCalleesByIds(calleeIds: Set<string> | string[]) {
+    for (const id of calleeIds) {
+      this.removeCalleeById(id);
+    }
+  }
 	
-	async buildCallMap(callee: vscode.CallHierarchyItem, visited: Set<string> = new Set()): Promise<number> {
+	async buildCallMap(callee: vscode.CallHierarchyItem): Promise<number> {
     const calleeId = Telecom.getIdentifier(callee);
+    const visited = new Set(this.contacts.keys());
     if (visited.has(calleeId)) {
 			return Promise.resolve(0);
     }
@@ -111,7 +129,7 @@ export class Telecom {
 			const promises: Promise<number>[] = [];
 			for (const caller of callers) {
 				this.addCaller(callee, caller);
-				promises.push(this.buildCallMap(caller, visited));
+				promises.push(this.buildCallMap(caller));
 			}
 			return Promise.all(promises).then((results) => {
 				return results.reduce((acc, r) => acc + r, 0) + callers.length;

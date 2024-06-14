@@ -3,17 +3,20 @@ import * as fs from "fs";
 import Parser from "web-tree-sitter";
 
 import { SearchViewProvider } from "./view-provider/search-webview-sidebar.provider";
-import { HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
+import { HierarchyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
 import { pickLang } from "./utils/utils";
 import { Method, getParser } from "./parser/parser";
 import { langRouter } from "./parser/lang-adapter";
 import { FileKeeper } from "./utils/file-keeper";
 
 import { registerWorkspaceListeners } from "./workspace-listeners";
+import { Telecom } from "./parser/lsp-ops";
+import { registerTelecomFactory } from "./telecom-factory";
 
 let fileKeeper: FileKeeper = new FileKeeper();
 let fileKeeperStorage: string;
-let hierarchyTreeProvider: HierachyTreeProvider;
+let hierarchyTreeProvider: HierarchyTreeProvider;
+let telecom: Telecom = new Telecom();
 
 export async function activate(context: vscode.ExtensionContext) {
   // sleep for 5 seconds to wait for the LSP server to start
@@ -64,8 +67,10 @@ export async function activate(context: vscode.ExtensionContext) {
       if (!pickedLang) {
         pickedLang = await vscode.commands.executeCommand("intellisearch.selectLang");
       }
-      hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang, searchViewProvider);
+      hierarchyTreeProvider = new HierarchyTreeProvider(uris, pickedLang, searchViewProvider);
       await hierarchyTreeProvider.intelliDoc();
+      let telecomFactory = registerTelecomFactory(hierarchyTreeProvider, telecom);
+      context.subscriptions.push(...telecomFactory);
       let workspaceListeners = registerWorkspaceListeners(hierarchyTreeProvider);
       context.subscriptions.push(...workspaceListeners);
     }
@@ -103,9 +108,11 @@ export async function activate(context: vscode.ExtensionContext) {
     "intellisearch.parseAll",
     async () => {
 			if (hierarchyTreeProvider) {
-				vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
+				// vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
 				const childrenCount = await hierarchyTreeProvider.inspectAllElements();
         vscode.window.showInformationMessage(`Inspect total ${childrenCount} elements in the workspace`);
+        telecom.hasInit = true;
+        await vscode.commands.executeCommand('intellisearch.initTelecom');
 			} else {
 				vscode.window.showErrorMessage("Please initialize the workspace first");
       }

@@ -82,9 +82,9 @@ export class MethodTreeItem extends HierarchyTreeItem {
   }
 }
 
-type MethodRecord = { method: Method, element: MethodTreeItem | null };
+export type MethodRecord = { method: Method, element: MethodTreeItem | null };
 
-export class HierachyTreeProvider
+export class HierarchyTreeProvider
   implements vscode.TreeDataProvider<HierarchyTreeItem>
 {
   private _onDidChangeTreeData: vscode.EventEmitter<
@@ -118,7 +118,7 @@ export class HierachyTreeProvider
     this.registerChangeSelectionListener();
   }
 
-  async refresh(elements: HierarchyTreeItem[]): Promise<void> {
+  async refresh(elements: HierarchyTreeItem[], callback?: (items?: HierarchyTreeItem[]) => Promise<void>): Promise<void> {
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
     if (elements.length === 0) {
@@ -134,10 +134,12 @@ export class HierachyTreeProvider
     }
     if (elements.length === 0) {
       this._onDidChangeTreeData.fire(undefined);
+      if (callback) { await callback(); }
     } else {
       for (let element of elements) {
         this._onDidChangeTreeData.fire(element);
       }
+      if (callback) { await callback(elements); }
     }
   }
 

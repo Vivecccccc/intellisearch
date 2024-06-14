@@ -2,9 +2,10 @@ import * as vscode from "vscode";
 import * as path from "path";
 
 import { removeSubFolders } from "./utils/utils";
-import { HierachyTreeProvider, HierarchyTreeItem } from "./view-provider/hierarchy-treeview.provider";
+import { HierarchyTreeProvider, HierarchyTreeItem } from "./view-provider/hierarchy-treeview.provider";
+import { callbackRefreshTelecom } from "./telecom-factory";
 
-export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreeProvider) {
+export function registerWorkspaceListeners(hierarchyTreeProvider: HierarchyTreeProvider) {
   const disposableUpdateWorkspaceFolders = vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
       if (event.added.length || event.removed.length) {
         const uris = vscode.workspace.workspaceFolders?.map((folder) => folder.uri) || [];
@@ -15,7 +16,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
           ).map((fsPath) => vscode.Uri.file(fsPath));
           const filteredFolders = removeSubFolders(uniqueFolders);
           hierarchyTreeProvider.folders = filteredFolders;
-          await hierarchyTreeProvider.refresh([]);
+          await hierarchyTreeProvider.refresh([], callbackRefreshTelecom);
         }
       }
     }
@@ -23,7 +24,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
 
   const deOverlap = (
     nodes: HierarchyTreeItem[],
-    hierachyTreeProvider: HierachyTreeProvider
+    hierachyTreeProvider: HierarchyTreeProvider
   ) => {
     const jet = new Set<HierarchyTreeItem>(nodes);
     for (const node of nodes) {
@@ -50,7 +51,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
             elements.push(element);
           }
         }
-        await hierarchyTreeProvider.refresh(elements);
+        await hierarchyTreeProvider.refresh(elements, callbackRefreshTelecom);
       }
     }
   );
@@ -62,7 +63,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         for (const file of event.files) {
           const parent = hierarchyTreeProvider.getNodeMap(file.fsPath)?.parent;
           if (!parent) {
-            await hierarchyTreeProvider.refresh([]);
+            await hierarchyTreeProvider.refresh([], callbackRefreshTelecom);
             return;
           }
           parents.push(parent);
@@ -70,7 +71,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         if (parents.length > 0) {
           parents = deOverlap(parents, hierarchyTreeProvider);
         }
-        await hierarchyTreeProvider.refresh(parents);
+        await hierarchyTreeProvider.refresh(parents, callbackRefreshTelecom);
       }
     }
   );
@@ -83,7 +84,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         for (const file of event.files) {
           const oldParent = hierarchyTreeProvider.getNodeMap(file.oldUri.fsPath)?.parent;
           if (!oldParent) {
-            await hierarchyTreeProvider.refresh([]);
+            await hierarchyTreeProvider.refresh([], callbackRefreshTelecom);
             break;
           }
           oldParents.push(oldParent);
@@ -91,7 +92,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         if (oldParents.length > 0) {
           oldParents = deOverlap(oldParents, hierarchyTreeProvider);
         }
-        await hierarchyTreeProvider.refresh(oldParents);
+        await hierarchyTreeProvider.refresh(oldParents, callbackRefreshTelecom);
         
         let newPaths: string[] = [];
         let hasRootParent: boolean = false;
@@ -109,7 +110,7 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
         } else {
           newParents = [];
         }
-        await hierarchyTreeProvider.refresh(newParents);
+        await hierarchyTreeProvider.refresh(newParents, callbackRefreshTelecom);
         newPaths = newPaths.filter((path) => hierarchyTreeProvider.filesSnapshot.includes(path));
         await hierarchyTreeProvider.injectMethodInFile(newPaths);
       }
@@ -125,9 +126,9 @@ export function registerWorkspaceListeners(hierarchyTreeProvider: HierachyTreePr
           await hierarchyTreeProvider.injectMethodInFile([filePath]);
         }
         if (parent) {
-          await hierarchyTreeProvider.refresh([parent]);
+          await hierarchyTreeProvider.refresh([parent], callbackRefreshTelecom);
         } else {
-          await hierarchyTreeProvider.refresh([]);
+          await hierarchyTreeProvider.refresh([], callbackRefreshTelecom);
         }
       }
     }

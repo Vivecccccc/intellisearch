@@ -39,6 +39,14 @@
         "command": "intellisearch.refreshTreeView",
         "title": "Refresh Hierarchy View",
         "icon": "$(sync)"
+      },
+      {
+        "command": "intellisearch.initTelecom",
+        "title": "Initialize Telecom"
+      },
+      {
+        "command": "intellisearch.refreshTelecom",
+        "title": "Refresh Telecom"
       }
     ],
     "viewsContainers": {
