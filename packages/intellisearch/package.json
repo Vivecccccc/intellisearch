@@ -34,6 +34,19 @@
         "command": "intellisearch.parseAll",
         "title": "Parse All",
         "icon": "$(play)"
+      },
+      {
+        "command": "intellisearch.refreshTreeView",
+        "title": "Refresh Hierarchy View",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "intellisearch.initTelecom",
+        "title": "Initialize Telecom"
+      },
+      {
+        "command": "intellisearch.refreshTelecom",
+        "title": "Refresh Telecom"
       }
     ],
     "viewsContainers": {
@@ -123,6 +136,11 @@
         },
         {
           "command": "intellisearch.parseAll",
+          "when": "view == intellisearch.hierarchy",
+          "group": "navigation"
+        },
+        {
+          "command": "intellisearch.refreshTreeView",
           "when": "view == intellisearch.hierarchy",
           "group": "navigation"
         }

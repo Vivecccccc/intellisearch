@@ -3,19 +3,24 @@ import * as fs from "fs";
 import Parser from "web-tree-sitter";
 
 import { SearchViewProvider } from "./view-provider/search-webview-sidebar.provider";
-import { HierachyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
+import { HierarchyTreeProvider } from "./view-provider/hierarchy-treeview.provider";
 import { pickLang } from "./utils/utils";
 import { Method, getParser } from "./parser/parser";
 import { langRouter } from "./parser/lang-adapter";
 import { FileKeeper } from "./utils/file-keeper";
 
 import { registerWorkspaceListeners } from "./workspace-listeners";
+import { Telecom } from "./parser/lsp-ops";
+import { registerTelecomFactory } from "./telecom-factory";
 
 let fileKeeper: FileKeeper = new FileKeeper();
 let fileKeeperStorage: string;
-let hierarchyTreeProvider: HierachyTreeProvider;
+let hierarchyTreeProvider: HierarchyTreeProvider;
+let telecom: Telecom = new Telecom();
 
 export async function activate(context: vscode.ExtensionContext) {
+  // sleep for 5 seconds to wait for the LSP server to start
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   if (!vscode.workspace.workspaceFolders) {
     return;
   }
@@ -23,13 +28,13 @@ export async function activate(context: vscode.ExtensionContext) {
   let parser: Parser;
 
   // see if the global storage dir exists
-  if (!fs.existsSync(context.globalStorageUri.fsPath)) {
-    fs.mkdirSync(context.globalStorageUri.fsPath);
-  }
-  fileKeeperStorage = context.globalStorageUri.fsPath + "/fileKeeper.json";
-  if (fs.existsSync(fileKeeperStorage)) {
-    fileKeeper.deserialize(fileKeeperStorage);
-  }
+  // if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+  //   fs.mkdirSync(context.globalStorageUri.fsPath);
+  // }
+  // fileKeeperStorage = context.globalStorageUri.fsPath + "/fileKeeper.json";
+  // if (fs.existsSync(fileKeeperStorage)) {
+  //   fileKeeper.deserialize(fileKeeperStorage);
+  // }
 
   const searchViewProvider: SearchViewProvider = new SearchViewProvider(context);
   const searchViewDisposable = vscode.window.registerWebviewViewProvider(
@@ -44,7 +49,7 @@ export async function activate(context: vscode.ExtensionContext) {
       let newPickedLang = await pickLang(context);
       if (hierarchyTreeProvider) {
         hierarchyTreeProvider.pickedLang = newPickedLang;
-        hierarchyTreeProvider.refresh();
+        await hierarchyTreeProvider.refresh([]);
       }
       return newPickedLang;
     }
@@ -62,7 +67,10 @@ export async function activate(context: vscode.ExtensionContext) {
       if (!pickedLang) {
         pickedLang = await vscode.commands.executeCommand("intellisearch.selectLang");
       }
-      hierarchyTreeProvider = new HierachyTreeProvider(uris, pickedLang, searchViewProvider);
+      hierarchyTreeProvider = new HierarchyTreeProvider(uris, pickedLang, searchViewProvider);
+      await hierarchyTreeProvider.intelliDoc();
+      let telecomFactory = registerTelecomFactory(hierarchyTreeProvider, telecom);
+      context.subscriptions.push(...telecomFactory);
       let workspaceListeners = registerWorkspaceListeners(hierarchyTreeProvider);
       context.subscriptions.push(...workspaceListeners);
     }
@@ -88,8 +96,8 @@ export async function activate(context: vscode.ExtensionContext) {
           methods = lumberjack.parseFile(fileUpdates.fileContent);
           fileKeeper.addFile(filePath, { fileHash: fileUpdates.fileElem.fileHash, methods: methods });
         }
+        parsedMethods.set(filePath, { flag: fileUpdates.flag, methods: methods });
         if (methods && methods.length > 0) {
-          parsedMethods.set(filePath, { flag: fileUpdates.flag, methods: methods });
         }
       }
       return parsedMethods;
@@ -100,11 +108,23 @@ export async function activate(context: vscode.ExtensionContext) {
     "intellisearch.parseAll",
     async () => {
 			if (hierarchyTreeProvider) {
-				vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
-				hierarchyTreeProvider.injectMethodInFile(hierarchyTreeProvider.filesSnapshot);
+				// vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
+				const childrenCount = await hierarchyTreeProvider.inspectAllElements();
+        vscode.window.showInformationMessage(`Inspect total ${childrenCount} elements in the workspace`);
+        telecom.hasInit = true;
+        await vscode.commands.executeCommand('intellisearch.initTelecom');
 			} else {
 				vscode.window.showErrorMessage("Please initialize the workspace first");
+      }
     }
+  );
+
+  const disposableRefreshTreeView = vscode.commands.registerCommand(
+    "intellisearch.refreshTreeView",
+    async () => {
+      if (hierarchyTreeProvider) {
+        await hierarchyTreeProvider.refresh([]);
+      }
     }
   );
   // deprecated
@@ -129,7 +149,8 @@ export async function activate(context: vscode.ExtensionContext) {
       disposableSelectLanguage,
       disposableInitFromWorkspace,
 			disposableParseFile,
-			disposableParseAll
+			disposableParseAll,
+      disposableRefreshTreeView,
 		]
 	);
   if (hierarchyTreeProvider! && hierarchyTreeProvider.hierarchyTreeView) {
@@ -139,13 +160,13 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function deactivate() {
-  let rootPath = fileKeeperStorage?.split('/').slice(0, -1).join('/');
-  fs.writeFileSync(rootPath + '/start.txt', '');
-  if (fileKeeperStorage) {
-    fileKeeper.serialize(fileKeeperStorage);
-  }
-  if (hierarchyTreeProvider && hierarchyTreeProvider.hierarchyTreeView) {
-    hierarchyTreeProvider.hierarchyTreeView.badge = undefined;
-  }
-  fs.writeFileSync(rootPath + '/end.txt', '');
+  // let rootPath = fileKeeperStorage?.split('/').slice(0, -1).join('/');
+  // fs.writeFileSync(rootPath + '/start.txt', '');
+  // if (fileKeeperStorage) {
+  //   fileKeeper.serialize(fileKeeperStorage);
+  // }
+  // if (hierarchyTreeProvider && hierarchyTreeProvider.hierarchyTreeView) {
+  //   hierarchyTreeProvider.hierarchyTreeView.badge = undefined;
+  // }
+  // fs.writeFileSync(rootPath + '/end.txt', '');
 }

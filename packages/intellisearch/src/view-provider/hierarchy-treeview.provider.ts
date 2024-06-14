@@ -6,8 +6,9 @@ import { minimatch } from "minimatch";
 import { decideLanguageFromUri } from "../utils/utils";
 import { Method } from "../parser/parser";
 import { SearchViewProvider } from "./search-webview-sidebar.provider";
+import { DocumentLspOperator } from "../parser/lsp-ops";
 
-export class HierachyTreeItem extends vscode.TreeItem {
+export class HierarchyTreeItem extends vscode.TreeItem {
   constructor(
     public readonly uri: vscode.Uri,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -45,7 +46,7 @@ export class HierachyTreeItem extends vscode.TreeItem {
   }
 }
 
-export class MethodTreeItem extends HierachyTreeItem {
+export class MethodTreeItem extends HierarchyTreeItem {
   constructor(
     public readonly uri: vscode.Uri,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -56,35 +57,53 @@ export class MethodTreeItem extends HierachyTreeItem {
     super(uri, collapsibleState, prefix, isRoot);
     this.iconPath = new vscode.ThemeIcon("symbol-function");
     this.method = method;
-    this.label = method.name;
+    this.label = method.symbol.name;
     this.contextValue = "method";
   }
 
   shouldEmphasised(uri: vscode.Uri, pickedLang: string): boolean {
     return false;
   }
+
+  findWrapper(op: DocumentLspOperator): string | boolean {
+    const symbol = this.method.symbol;
+    const wrapper = op.getWrapper(
+      symbol,
+      [
+        vscode.SymbolKind.Class,
+        vscode.SymbolKind.Interface,
+        vscode.SymbolKind.Struct,
+      ]
+    );
+    if (wrapper) {
+      return wrapper.name;
+    }
+    return false;
+  }
 }
 
-export class HierachyTreeProvider
-  implements vscode.TreeDataProvider<HierachyTreeItem>
+export type MethodRecord = { method: Method, element: MethodTreeItem | null };
+
+export class HierarchyTreeProvider
+  implements vscode.TreeDataProvider<HierarchyTreeItem>
 {
   private _onDidChangeTreeData: vscode.EventEmitter<
-    HierachyTreeItem | undefined
-  > = new vscode.EventEmitter<HierachyTreeItem | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<HierachyTreeItem | undefined> =
-    this._onDidChangeTreeData.event;
+    HierarchyTreeItem | undefined
+  > = new vscode.EventEmitter<HierarchyTreeItem | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<HierarchyTreeItem | undefined> = this._onDidChangeTreeData.event;
+  private _nodeMap = new Map<string, { parent: HierarchyTreeItem | undefined, item: HierarchyTreeItem }>();
 
   filesSnapshot: string[] = [];
-  methodsSnapshot: Map<string, Method[]> = new Map();
-  hierarchyTreeView: vscode.TreeView<HierachyTreeItem> | undefined = undefined;
+  methodsSnapshot: Map<string, MethodRecord[]> = new Map();
+  hierarchyTreeView: vscode.TreeView<HierarchyTreeItem> | undefined = undefined;
   searchWebviewProvider: SearchViewProvider;
+  yellowPages: Map<string, DocumentLspOperator> = new Map();
 
   constructor(
     public folders: vscode.Uri[],
     public pickedLang: string,
     searchWebviewProvider: SearchViewProvider
   ) {
-    
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
     this.hierarchyTreeView = vscode.window.createTreeView(
@@ -99,31 +118,40 @@ export class HierachyTreeProvider
     this.registerChangeSelectionListener();
   }
 
-  refresh(): void {
+  async refresh(elements: HierarchyTreeItem[], callback?: (items?: HierarchyTreeItem[]) => Promise<void>): Promise<void> {
     this.filesSnapshot = this.getConcernedFiles();
     this.cleanMethodsSnapshot();
+    if (elements.length === 0) {
+      await this.intelliDoc();
+    } else {
+      await this.intelliDoc(elements);
+    }
     if (this.hierarchyTreeView) {
       this.hierarchyTreeView.badge = {
         value: this.filesSnapshot.length,
         tooltip: `${this.filesSnapshot.length} valid files`,
       };
     }
-    this._onDidChangeTreeData.fire(undefined);
+    if (elements.length === 0) {
+      this._onDidChangeTreeData.fire(undefined);
+      if (callback) { await callback(); }
+    } else {
+      for (let element of elements) {
+        this._onDidChangeTreeData.fire(element);
+      }
+      if (callback) { await callback(elements); }
+    }
   }
 
   getTreeItem(
-    element: HierachyTreeItem
+    element: HierarchyTreeItem
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
-    if (element.shouldEmphasised(element.uri, this.pickedLang)) {
-      let rawLabel = element.label as string;
-      element.label = { highlights: [[0, rawLabel.length]], label: rawLabel };
-    }
-    return element;
+    return this.decorateItem(element);
   }
 
   getChildren(
-    element?: HierachyTreeItem | undefined
-  ): vscode.ProviderResult<HierachyTreeItem[]> {
+    element?: HierarchyTreeItem | undefined
+  ) {
     if (!this.folders.length) {
       return Promise.resolve([]);
     }
@@ -142,8 +170,8 @@ export class HierachyTreeProvider
             // get the path execpt for the basename of the file
             const prefix = element.uri.fsPath + path.sep;
             const isChildDir = fs.statSync(uri.fsPath).isDirectory();
-            const doesFileHaveMethods = this.methodsSnapshot.has(uri.fsPath);
-            return new HierachyTreeItem(
+            const doesFileHaveMethods = this.methodsSnapshot.has(uri.fsPath) && this.methodsSnapshot.get(uri.fsPath)!.length > 0;
+            let childItem = new HierarchyTreeItem(
               uri,
               isChildDir || doesFileHaveMethods
                 ? vscode.TreeItemCollapsibleState.Collapsed
@@ -151,21 +179,29 @@ export class HierachyTreeProvider
               prefix,
               false
             );
+            this.setNodeMap(childItem, element);
+            return childItem;
           });
         return Promise.resolve(children);
       } else {
-        const methods = this.methodsSnapshot.get(element.uri.fsPath);
-        if (methods) {
-          return methods.map(
-            (method) =>
-              new MethodTreeItem(
+        const records = this.methodsSnapshot.get(element.uri.fsPath);
+        if (records) {
+          const newRecords: { method: Method, element: MethodTreeItem }[] = [];
+          const methodItems = records.map(
+            (record) => {
+              const methodItem = new MethodTreeItem(
                 element.uri,
                 vscode.TreeItemCollapsibleState.None,
                 "",
                 false,
-                method
-              )
+                record.method
+              );
+              newRecords.push({ method: record.method, element: methodItem });
+              return this.decorateItem(methodItem);
+            }
           );
+          this.methodsSnapshot.set(element.uri.fsPath, newRecords);
+          return Promise.resolve(methodItems);
         } else {
           return Promise.resolve([]);
         }
@@ -176,16 +212,27 @@ export class HierachyTreeProvider
       const rootItems = this.folders
         .filter((folder) => !isIgnoredFolder(folder))
         .map(
-          (folder) =>
-            new HierachyTreeItem(
+          (folder) => {
+            let childItem = new HierarchyTreeItem(
               folder,
               vscode.TreeItemCollapsibleState.Collapsed,
               prefix,
               true
-            )
+            );
+            this.setNodeMap(childItem, undefined);
+            return childItem;
+          }
         );
       return Promise.resolve(rootItems);
     }
+  }
+
+  getParent(element: HierarchyTreeItem): vscode.ProviderResult<HierarchyTreeItem> {
+    if (element instanceof MethodTreeItem) {
+      return this.getNodeMap(element.uri.fsPath)?.item || null;
+    }
+    const parent = this.getNodeMap(element.uri.fsPath)?.parent;
+    return parent ? parent : null;
   }
 
   private getCommonPath(): string {
@@ -223,38 +270,70 @@ export class HierachyTreeProvider
     this.folders = this.folders.filter(
       (folder) => !isIgnoredFolder(folder)
     );
-    this.folders.forEach((folder) => {
-      const getFiles = (dir: string) => {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
-          if (entry.isDirectory()) {
-            if (isIgnoredFolder(vscode.Uri.file(fullPath))) {
-              continue;
-            }
-            getFiles(fullPath);
-          } else if (
-            decideLanguageFromUri(vscode.Uri.file(fullPath)) === this.pickedLang
-          ) {
-            files.push(fullPath);
+    const getFiles = (dir: string) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (isIgnoredFolder(vscode.Uri.file(fullPath))) {
+            continue;
           }
+          getFiles(fullPath);
+        } else if (
+          decideLanguageFromUri(vscode.Uri.file(fullPath)) === this.pickedLang
+        ) {
+          files.push(fullPath);
         }
-      };
+      }
+    };
+    this.folders.forEach((folder) => {
       getFiles(folder.fsPath);
     });
     return files;
   }
 
-  injectMethodInFile(paths: string[]) {
-    vscode.commands
-      .executeCommand("intellisearch.parseFile", paths)
-      .then((parsedMethodsWithFlag) => {
-        const fileMethodMap = parsedMethodsWithFlag as Map<string, { flag: boolean, methods: Method[] }>;
-        this.setParsedMethods(fileMethodMap);
-      });
+  private decorateItem(element: HierarchyTreeItem) {
+    if (element.shouldEmphasised(element.uri, this.pickedLang)) {
+      let rawLabel = element.label as string;
+      element.label = { highlights: [[0, rawLabel.length]], label: rawLabel };
+    }
+    if (element instanceof MethodTreeItem) {
+      let item = element as MethodTreeItem;
+      if (!item.description) {
+        let op = this.yellowPages.get(item.uri.fsPath);
+        if (op) {
+          element.description = item.findWrapper(op);
+        }
+      }
+    }
+    return element;
   }
 
-  private lazyInjectMethodInFile(items: HierachyTreeItem[]) {
+  async intelliDoc(updatedParents?: HierarchyTreeItem[]): Promise<void> {
+    const shouldUpdate = (fp: string) => {
+      let flag = !updatedParents;
+      flag ||= !this.yellowPages.has(fp);
+      flag ||= updatedParents!.some((parent) => fp.startsWith(parent.uri.fsPath));
+      return flag;
+    };
+    const promises = [];
+    for (const fp of this.filesSnapshot) {
+      if (shouldUpdate(fp)) {
+        const doc = new DocumentLspOperator(vscode.Uri.file(fp));
+        promises.push(doc.init());
+        this.yellowPages.set(fp, doc);
+      }
+    }
+    await Promise.all(promises);
+  }
+
+  async injectMethodInFile(paths: string[]) {
+    const parsedMethodsWithFlag = await vscode.commands.executeCommand("intellisearch.parseFile", paths);
+    const fileMethodMap = parsedMethodsWithFlag as Map<string, { flag: boolean, methods: Method[] }>;
+    this.setParsedMethods(fileMethodMap);
+  }
+
+  private lazyInjectMethodInFile(items: HierarchyTreeItem[]) {
     let filePaths = items.map((item) => item.uri.fsPath);
     vscode.commands.executeCommand("intellisearch.parseFile", filePaths)
       .then((parsedMethodsWithFlag) => {
@@ -266,8 +345,11 @@ export class HierachyTreeProvider
   private setParsedMethods(parsedMethodsWithFlag: Map<string, { flag: boolean, methods: Method[] }>) {
     const newlyParsedMethods = new Map<string, Method[]>();
     for (let [filePath, fileUpdates] of parsedMethodsWithFlag.entries()) {
-      if (fileUpdates.flag || !this.methodsSnapshot.has(filePath)) { 
-        this.methodsSnapshot.set(filePath, fileUpdates.methods);
+      if (fileUpdates.flag || !this.methodsSnapshot.has(filePath)) {
+        const records: MethodRecord[] = fileUpdates.methods.map((method) => {
+          return { method: method, element: null };
+        });
+        this.methodsSnapshot.set(filePath, records);
         newlyParsedMethods.set(filePath, fileUpdates.methods);
       }
     }
@@ -301,17 +383,17 @@ export class HierachyTreeProvider
               vscode.TextEditorRevealType.InCenter
             );
           });
-        } else if (item instanceof HierachyTreeItem) {
+        } else if (item instanceof HierarchyTreeItem) {
           if (!fs.statSync(item.uri.fsPath).isDirectory()) {
             vscode.window.showTextDocument(item.uri);
-            if (this.filesSnapshot.includes(item.uri.fsPath)) { this.injectMethodInFile([item.uri.fsPath]); }
+            if (this.filesSnapshot.includes(item.uri.fsPath)) { await this.injectMethodInFile([item.uri.fsPath]); }
           } else {
             let children = await this.getChildren(item);
             if (!children) {
               return;
             }
             children = children.filter((child) => this.filesSnapshot.includes(child.uri.fsPath));
-            this.injectMethodInFile(children.map((child) => child.uri.fsPath));
+            await this.injectMethodInFile(children.map((child) => child.uri.fsPath));
           }
         }
       }
@@ -321,17 +403,47 @@ export class HierachyTreeProvider
   private cleanMethodsSnapshot() {
     // clean the previous methods if its file is not in the current filesSnapshot
     const removedParsedMethods = new Map<string, Method[]>();
-    this.methodsSnapshot.forEach((methods, uri) => {
+    this.methodsSnapshot.forEach((records, uri) => {
       if (!this.filesSnapshot.includes(uri)) {
         const flag = this.methodsSnapshot.delete(uri);
         if (flag) {
-          removedParsedMethods.set(uri, methods);
+          removedParsedMethods.set(uri, records.map((record) => record.method));
         }
       }
     });
     if (removedParsedMethods.size) {
       this.searchWebviewProvider.updateMethodPool(removedParsedMethods, false);
     }
+  }
+
+  setNodeMap(element: HierarchyTreeItem, parent: HierarchyTreeItem | undefined) {
+    const nodePath = element.uri.fsPath;
+    this._nodeMap.set(
+      nodePath,
+      { parent: parent, item: element }
+    );
+  }
+
+  getNodeMap(nodePath: string) {
+    return this._nodeMap.get(nodePath);
+  }
+
+  async inspectAllElements(): Promise<number> {
+    await this.injectMethodInFile(this.filesSnapshot);
+    
+    const recursiveGetChildren = async (element: HierarchyTreeItem | undefined): Promise<number> => {
+      const children = await this.getChildren(element);
+      let count = children.length;
+      for (const child of children) {
+        if (child instanceof HierarchyTreeItem && 
+            child.collapsibleState !== vscode.TreeItemCollapsibleState.None) {
+          count += await recursiveGetChildren(child);
+        }
+      }
+      return count;
+    };
+    const totalChildren = await recursiveGetChildren(undefined);
+    return totalChildren;
   }
 }
 
