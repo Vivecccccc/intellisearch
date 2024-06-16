@@ -7,25 +7,30 @@ export function registerTelecomFactory(hierarchyTreeProvider: HierarchyTreeProvi
   
   const _buildCallMapFromMethodsSnapshot = async (filePath: string, methodRecords: MethodRecord[]) => {
     const fileUri = vscode.Uri.file(filePath);
+    let countOfCallers = 0;
     for (const record of methodRecords) {
       const method = record.method;
       const loc = new vscode.Location(fileUri, method.symbol.range);
       const callHierarchies = await Telecom.prepareCallHierarchies(loc);
       for (const item of callHierarchies) {
-        await telecom.buildCallMap(item);
+        countOfCallers += await telecom.buildCallMap(item);
       }
     }
+    return countOfCallers;
   };
   
   const disposableInitTelecom = vscode.commands.registerCommand(
     'intellisearch.initTelecom',
     async () => {
       if (!telecom.hasInit) {
-        return;
+        return 0;
       }
+      let countOfCallers = 0;
       for (const [filePath, methodRecords] of hierarchyTreeProvider.methodsSnapshot) {
-        await _buildCallMapFromMethodsSnapshot(filePath, methodRecords);
+        countOfCallers += await _buildCallMapFromMethodsSnapshot(filePath, methodRecords);
       }
+      telecom.serialize_contacts();
+      return countOfCallers;
     }
   );
 
@@ -33,11 +38,10 @@ export function registerTelecomFactory(hierarchyTreeProvider: HierarchyTreeProvi
     'intellisearch.refreshTelecom',
     async (changedItems?: HierarchyTreeItem[]) => {
       if (!telecom.hasInit) {
-        return;
+        return 0;
       }
       if (!changedItems) {
-        await vscode.commands.executeCommand('intellisearch.initTelecom');
-        return;
+        return await vscode.commands.executeCommand('intellisearch.initTelecom');
       } 
       const contacts = telecom.getContacts();
       // map calleeId to filePath
@@ -50,6 +54,7 @@ export function registerTelecomFactory(hierarchyTreeProvider: HierarchyTreeProvi
         filePathsMap.get(filePath)?.add(calleeId);
       }
       const isFilePathInItem = (fp: string, ip: string) => fp.startsWith(ip);
+      let countOfCallers = 0;
       for (const item of changedItems) {
         const itemPath = item.uri.fsPath;
         for (const [filePath, calleeIds] of filePathsMap) {
@@ -59,10 +64,11 @@ export function registerTelecomFactory(hierarchyTreeProvider: HierarchyTreeProvi
         }
         for (const [filePath, methodRecords] of hierarchyTreeProvider.methodsSnapshot) {
           if (isFilePathInItem(filePath, itemPath)) {
-            await _buildCallMapFromMethodsSnapshot(filePath, methodRecords);
+            countOfCallers += await _buildCallMapFromMethodsSnapshot(filePath, methodRecords);
           }
         }
       }
+      return countOfCallers;
     }
   );
 

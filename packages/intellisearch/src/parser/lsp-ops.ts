@@ -11,6 +11,11 @@ export class SymbolExt extends Symbol {
 	}
 }
 
+const allowedCallerKinds = [
+  vscode.SymbolKind.Function,
+  vscode.SymbolKind.Method
+];
+
 export class Telecom {
   hasInit: boolean = false;
   private contacts: Map<string, Set<string>>;
@@ -72,7 +77,7 @@ export class Telecom {
 			);
 		};
 		let callHierarchies = await Telecom.prepareCallHierarchies(loc);
-		const callers: vscode.CallHierarchyItem[] = [];
+		let callers: vscode.CallHierarchyItem[] = [];
 		for (const item of callHierarchies) {
 			const incomingCalls = await getIncomingCalls(item);
 			if (!incomingCalls) {
@@ -80,6 +85,7 @@ export class Telecom {
 			}
 			callers.push(...incomingCalls.map((c) => c.from));
 		}
+    callers = callers.filter((c) => allowedCallerKinds.includes(c.kind));
 		if (callers.length === 0) {
 			return null;
 		}
@@ -136,6 +142,32 @@ export class Telecom {
 			});
     });
 	}
+
+  serialize_contacts() {
+    const contactsObj = Object.fromEntries(Array.from(this.contacts.entries(), ([k, v]) => [k, [...v]]));
+  
+    const nodesSet = new Set<string>();
+    const edges = [];
+    const countOfCallees = new Map();
+  
+    for (const [key, values] of Object.entries(contactsObj)) {
+      nodesSet.add(key);
+      for (const value of values) {
+        nodesSet.add(value);
+        edges.push({ source: key, target: value });
+        countOfCallees.set(value, (countOfCallees.get(value) || 0) + 1);
+      }
+    }
+  
+    const nodes = Array.from(nodesSet).map(id => ({ 
+      id,
+      name: id.split("::")[1],
+      symbolSize: Math.exp(countOfCallees.get(id) || 0)
+    }));
+  
+    const graphData = { nodes, edges };
+    fs.writeFileSync("contacts.json", JSON.stringify(graphData, null, 2));
+  }
 }
 
 export class DocumentLspOperator {
