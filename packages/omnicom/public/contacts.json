@@ -1,0 +1,779 @@
+{
+  "nodes": [
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lang-adapter.ts::extractMethodName::15@2:15@19",
+      "name": "extractMethodName",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19",
+      "name": "extractAllMethods",
+      "symbolSize": 148.4131591025766
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::parseFile::151@2:151@11",
+      "name": "parseFile",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30",
+      "name": "activate",
+      "symbolSize": 1202604.2841647768
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lang-adapter.ts::langRouter::111@16:111@26",
+      "name": "langRouter",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::SymbolExt::5@13:5@22",
+      "name": "SymbolExt",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symbolize::33@8:33@17",
+      "name": "symbolize",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::retrieveCallers::103@1:103@16",
+      "name": "retrieveCallers",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getContacts::23@2:23@13",
+      "name": "getContacts",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::registerTelecomFactory::5@16:5@38",
+      "name": "registerTelecomFactory",
+      "symbolSize": 54.598150033144236
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getIdentifier::27@8:27@21",
+      "name": "getIdentifier",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::addCaller::94@1:94@10",
+      "name": "addCaller",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19",
+      "name": "buildCallMap",
+      "symbolSize": 54.598150033144236
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::_buildCallMapFromMethodsSnapshot::7@8:7@40",
+      "name": "_buildCallMapFromMethodsSnapshot",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::prepareCallHierarchies::56@14:56@36",
+      "name": "prepareCallHierarchies",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getCallers::71@14:71@24",
+      "name": "getCallers",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::removeCalleeById::112@2:112@18",
+      "name": "removeCalleeById",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::removeCalleesByIds::116@2:116@20",
+      "name": "removeCalleesByIds",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::serialize_contacts::145@2:145@20",
+      "name": "serialize_contacts",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::DocumentLspOperator::172@13:172@32",
+      "name": "DocumentLspOperator",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::intelliDoc::311@8:311@18",
+      "name": "intelliDoc",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::refresh::120@8:120@15",
+      "name": "refresh",
+      "symbolSize": 20.085536923187668
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42",
+      "name": "registerWorkspaceListeners",
+      "symbolSize": 148.4131591025766
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::clear::188@9:188@14",
+      "name": "clear",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::init::194@7:194@11",
+      "name": "init",
+      "symbolSize": 20.085536923187668
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::flatten::215@9:215@16",
+      "name": "flatten",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symInfoToDocSym::233@9:233@24",
+      "name": "symInfoToDocSym",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getRef::274@1:274@7",
+      "name": "getRef",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getWrapper::288@1:288@11",
+      "name": "getWrapper",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::findWrapper::67@2:67@13",
+      "name": "findWrapper",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::decorateItem::294@10:294@22",
+      "name": "decorateItem",
+      "symbolSize": 20.085536923187668
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getTreeItem::145@2:145@13",
+      "name": "getTreeItem",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13",
+      "name": "getChildren",
+      "symbolSize": 403.4287934927351
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::registerChangeSelectionListener::361@10:361@41",
+      "name": "registerChangeSelectionListener",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::recursiveGetChildren::433@10:433@30",
+      "name": "recursiveGetChildren",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::inspectAllElements::430@8:430@26",
+      "name": "inspectAllElements",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::getParser::4@22:4@31",
+      "name": "getParser",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::Symbol::91@13:91@19",
+      "name": "Symbol",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractMethodName::183@12:183@29",
+      "name": "extractMethodName",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::Method::112@13:112@19",
+      "name": "Method",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::reIndentMethod::207@12:207@26",
+      "name": "reIndentMethod",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\services\\infer-service.ts::getEmbeddings::37@22:37@35",
+      "name": "getEmbeddings",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\librarian.ts::addMethods::95@15:95@25",
+      "name": "addMethods",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\services\\login-service.ts::getCredential::12@16:12@29",
+      "name": "getCredential",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLoginListener::50@2:50@23",
+      "name": "registerLoginListener",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::resolveWebviewView::38@8:38@26",
+      "name": "resolveWebviewView",
+      "symbolSize": 54.598150033144236
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\file-keeper.ts::addFile::17@2:17@9",
+      "name": "addFile",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\file-keeper.ts::checkFileUpdate::29@2:29@17",
+      "name": "checkFileUpdate",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::decideLanguageFromUri::4@16:4@37",
+      "name": "decideLanguageFromUri",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18",
+      "name": "shouldEmphasised",
+      "symbolSize": 54.598150033144236
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getFiles::272@10:272@18",
+      "name": "getFiles",
+      "symbolSize": 20.085536923187668
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getConcernedFiles::267@10:267@27",
+      "name": "getConcernedFiles",
+      "symbolSize": 7.38905609893065
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::removeSubFolders::41@16:41@32",
+      "name": "removeSubFolders",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::pickLang::52@22:52@30",
+      "name": "pickLang",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::sha256Hash::99@16:99@26",
+      "name": "sha256Hash",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::updateMethodPool::95@9:95@25",
+      "name": "updateMethodPool",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::setParsedMethods::344@10:344@26",
+      "name": "setParsedMethods",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::cleanMethodsSnapshot::402@10:402@30",
+      "name": "cleanMethodsSnapshot",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::injectMethodInFile::329@8:329@26",
+      "name": "injectMethodInFile",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::lazyInjectMethodInFile::335@10:335@32",
+      "name": "lazyInjectMethodInFile",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::HierarchyTreeItem::10@13:10@30",
+      "name": "HierarchyTreeItem",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::MethodTreeItem::48@13:48@27",
+      "name": "MethodTreeItem",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::63@2:63@18",
+      "name": "shouldEmphasised",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::HierarchyTreeProvider::86@13:86@34",
+      "name": "HierarchyTreeProvider",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getCommonPath::237@10:237@23",
+      "name": "getCommonPath",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::setNodeMap::418@2:418@12",
+      "name": "setNodeMap",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getNodeMap::426@2:426@12",
+      "name": "getNodeMap",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getParent::229@2:229@11",
+      "name": "getParent",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::deOverlap::24@8:24@17",
+      "name": "deOverlap",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::isIgnoredFolder::449@9:449@24",
+      "name": "isIgnoredFolder",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-abstract.provider.ts::getWebviewHtml::12@18:12@32",
+      "name": "getWebviewHtml",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\telecom-webview.provider.ts::resolveWebviewView::13@7:13@25",
+      "name": "resolveWebviewView",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::SearchViewProvider::24@13:24@31",
+      "name": "SearchViewProvider",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLogoutListener::78@2:78@24",
+      "name": "registerLogoutListener",
+      "symbolSize": 1
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLoadMoreListener::86@2:86@26",
+      "name": "registerLoadMoreListener",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::loadMoreMethodsFromPool::121@9:121@32",
+      "name": "loadMoreMethodsFromPool",
+      "symbolSize": 2.718281828459045
+    },
+    {
+      "id": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::postMethodsToWebview::140@10:140@30",
+      "name": "postMethodsToWebview",
+      "symbolSize": 1
+    }
+  ],
+  "edges": [
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lang-adapter.ts::extractMethodName::15@2:15@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::parseFile::151@2:151@11"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::parseFile::151@2:151@11",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lang-adapter.ts::langRouter::111@16:111@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::SymbolExt::5@13:5@22",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symbolize::33@8:33@17"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symbolize::33@8:33@17",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::retrieveCallers::103@1:103@16"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getContacts::23@2:23@13",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::registerTelecomFactory::5@16:5@38"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::registerTelecomFactory::5@16:5@38",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getIdentifier::27@8:27@21",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::addCaller::94@1:94@10"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getIdentifier::27@8:27@21",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::retrieveCallers::103@1:103@16"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getIdentifier::27@8:27@21",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::addCaller::94@1:94@10",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::_buildCallMapFromMethodsSnapshot::7@8:7@40"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::_buildCallMapFromMethodsSnapshot::7@8:7@40",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::registerTelecomFactory::5@16:5@38"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::prepareCallHierarchies::56@14:56@36",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getCallers::71@14:71@24"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::prepareCallHierarchies::56@14:56@36",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::_buildCallMapFromMethodsSnapshot::7@8:7@40"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getCallers::71@14:71@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::buildCallMap::122@7:122@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::removeCalleeById::112@2:112@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::removeCalleesByIds::116@2:116@20"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::removeCalleesByIds::116@2:116@20",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::registerTelecomFactory::5@16:5@38"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::serialize_contacts::145@2:145@20",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\telecom-factory.ts::registerTelecomFactory::5@16:5@38"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::DocumentLspOperator::172@13:172@32",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::intelliDoc::311@8:311@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::intelliDoc::311@8:311@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::refresh::120@8:120@15"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::intelliDoc::311@8:311@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::refresh::120@8:120@15",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::refresh::120@8:120@15",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::clear::188@9:188@14",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::init::194@7:194@11"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::init::194@7:194@11",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::intelliDoc::311@8:311@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::flatten::215@9:215@16",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::init::194@7:194@11"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::flatten::215@9:215@16",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::flatten::215@9:215@16"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symInfoToDocSym::233@9:233@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::init::194@7:194@11"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symInfoToDocSym::233@9:233@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::symInfoToDocSym::233@9:233@24"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getRef::274@1:274@7",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getWrapper::288@1:288@11"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lsp-ops.ts::getWrapper::288@1:288@11",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::findWrapper::67@2:67@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::findWrapper::67@2:67@13",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::decorateItem::294@10:294@22"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::decorateItem::294@10:294@22",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getTreeItem::145@2:145@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::decorateItem::294@10:294@22",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::registerChangeSelectionListener::361@10:361@41"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::recursiveGetChildren::433@10:433@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::recursiveGetChildren::433@10:433@30",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::recursiveGetChildren::433@10:433@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::recursiveGetChildren::433@10:433@30",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::inspectAllElements::430@8:430@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::inspectAllElements::430@8:430@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::getParser::4@22:4@31",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::Symbol::91@13:91@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractMethodName::183@12:183@29"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::Symbol::91@13:91@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\lang-adapter.ts::extractMethodName::15@2:15@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractMethodName::183@12:183@29",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::Method::112@13:112@19",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::reIndentMethod::207@12:207@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\parser\\parser.ts::extractAllMethods::156@2:156@19"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\services\\infer-service.ts::getEmbeddings::37@22:37@35",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\librarian.ts::addMethods::95@15:95@25"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\services\\login-service.ts::getCredential::12@16:12@29",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLoginListener::50@2:50@23"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLoginListener::50@2:50@23",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::resolveWebviewView::38@8:38@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\file-keeper.ts::addFile::17@2:17@9",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\file-keeper.ts::checkFileUpdate::29@2:29@17",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::decideLanguageFromUri::4@16:4@37",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::decideLanguageFromUri::4@16:4@37",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getFiles::272@10:272@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::decorateItem::294@10:294@22"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getFiles::272@10:272@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getFiles::272@10:272@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getFiles::272@10:272@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getConcernedFiles::267@10:267@27"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getConcernedFiles::267@10:267@27",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::refresh::120@8:120@15"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::removeSubFolders::41@16:41@32",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::pickLang::52@22:52@30",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::sha256Hash::99@16:99@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::updateMethodPool::95@9:95@25"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\utils.ts::sha256Hash::99@16:99@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\utils\\file-keeper.ts::checkFileUpdate::29@2:29@17"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::updateMethodPool::95@9:95@25",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::setParsedMethods::344@10:344@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::updateMethodPool::95@9:95@25",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::cleanMethodsSnapshot::402@10:402@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::updateMethodPool::95@9:95@25",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::setParsedMethods::344@10:344@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::injectMethodInFile::329@8:329@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::setParsedMethods::344@10:344@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::lazyInjectMethodInFile::335@10:335@32"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::cleanMethodsSnapshot::402@10:402@30",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::refresh::120@8:120@15"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::injectMethodInFile::329@8:329@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::registerChangeSelectionListener::361@10:361@41"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::injectMethodInFile::329@8:329@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::inspectAllElements::430@8:430@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::injectMethodInFile::329@8:329@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::HierarchyTreeItem::10@13:10@30",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::MethodTreeItem::48@13:48@27",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::63@2:63@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::63@2:63@18",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::decorateItem::294@10:294@22"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::HierarchyTreeProvider::86@13:86@34",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getCommonPath::237@10:237@23",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::setNodeMap::418@2:418@12",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getNodeMap::426@2:426@12",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getParent::229@2:229@11"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getNodeMap::426@2:426@12",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::deOverlap::24@8:24@17"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getNodeMap::426@2:426@12",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::deOverlap::24@8:24@17",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\workspace-listeners.ts::registerWorkspaceListeners::7@16:7@42"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::isIgnoredFolder::449@9:449@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::shouldEmphasised::30@2:30@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::isIgnoredFolder::449@9:449@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getChildren::151@2:151@13"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::isIgnoredFolder::449@9:449@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getConcernedFiles::267@10:267@27"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::isIgnoredFolder::449@9:449@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\hierarchy-treeview.provider.ts::getFiles::272@10:272@18"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-abstract.provider.ts::getWebviewHtml::12@18:12@32",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::resolveWebviewView::38@8:38@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-abstract.provider.ts::getWebviewHtml::12@18:12@32",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\telecom-webview.provider.ts::resolveWebviewView::13@7:13@25"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::SearchViewProvider::24@13:24@31",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\extension.ts::activate::20@22:20@30"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLogoutListener::78@2:78@24",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::resolveWebviewView::38@8:38@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLoadMoreListener::86@2:86@26",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::resolveWebviewView::38@8:38@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::loadMoreMethodsFromPool::121@9:121@32",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::registerLoadMoreListener::86@2:86@26"
+    },
+    {
+      "source": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::postMethodsToWebview::140@10:140@30",
+      "target": "e:\\dev\\codesearch\\intelliSearch\\packages\\intellisearch\\src\\view-provider\\search-webview-sidebar.provider.ts::loadMoreMethodsFromPool::121@9:121@32"
+    }
+  ]
+}
