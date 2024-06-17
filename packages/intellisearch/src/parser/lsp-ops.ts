@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 
 import { Symbol } from "./parser";
+import { HierarchyTreeProvider } from "../view-provider/hierarchy-treeview.provider";
 
 export class SymbolExt extends Symbol {
 	readonly loc: vscode.Location;
@@ -16,27 +17,51 @@ const allowedCallerKinds = [
   vscode.SymbolKind.Method
 ];
 
+const allowedWrapperKinds = [
+  vscode.SymbolKind.Class,
+  vscode.SymbolKind.Interface,
+  vscode.SymbolKind.Struct
+];
+
 export class Telecom {
   hasInit: boolean = false;
+  yellowPages: Map<string, DocumentLspOperator> = new Map();
   private contacts: Map<string, Set<string>>;
 	constructor() { this.contacts = new Map(); }
+
+  init(hierarchyTreeProvider: HierarchyTreeProvider) {
+    this.yellowPages = hierarchyTreeProvider.yellowPages;
+    this.hasInit = true;
+  }
 
   getContacts() {
     return this.contacts;
   }
 
-	static getIdentifier(item: vscode.CallHierarchyItem): string {
+	static getIdentifier(item: vscode.CallHierarchyItem, yellowPages: Map<string, DocumentLspOperator>): string {
 		const start = item.selectionRange.start;
 		const end = item.selectionRange.end;
-		return `${item.uri.fsPath}::${item.name}::${start.line}@${start.character}:${end.line}@${end.character}`;
+    const filePath = item.uri.fsPath;
+    let wrapperName = "";
+    if (yellowPages) {
+      const op = yellowPages.get(filePath);
+      if (op) {
+        const wrapper = op.getWrapper(item, allowedWrapperKinds);
+        if (wrapper) {
+          wrapperName = `${wrapper.name}:`;
+        }
+      }
+    }
+		return `${item.uri.fsPath}::${wrapperName}${item.name}::${start.line}@${start.character}:${end.line}@${end.character}`;
 	}
 
 	static symbolize(s: string): SymbolExt | null {
 		try {
-			const [path, name, pos] = s.split("::");
+			const [path, fullName, pos] = s.split("::");
 			if (!fs.existsSync(path)) {
 				throw new Error(`File not found: ${path}`);
 			}
+      const [, name] = fullName.split(":");
 			const [start, end] = pos.split(":");
 			const [startLine, startChar] = start.split("@");
 			const [endLine, endChar] = end.split("@");
@@ -93,8 +118,9 @@ export class Telecom {
 	}
 
 	addCaller(callee: vscode.CallHierarchyItem, caller: vscode.CallHierarchyItem) {
-		const calleeId = Telecom.getIdentifier(callee);
-		const callerId = Telecom.getIdentifier(caller);
+		const yellowPages = this.yellowPages;
+    const calleeId = Telecom.getIdentifier(callee, yellowPages);
+		const callerId = Telecom.getIdentifier(caller, yellowPages);
 		if (!this.contacts.has(calleeId)) {
 			this.contacts.set(calleeId, new Set());
 		}
@@ -102,7 +128,8 @@ export class Telecom {
 	}
 
 	retrieveCallers(callee: vscode.CallHierarchyItem): SymbolExt[] {
-		const calleeId = Telecom.getIdentifier(callee);
+    const yellowPages = this.yellowPages;
+		const calleeId = Telecom.getIdentifier(callee, yellowPages);
 		if (!this.contacts.has(calleeId)) {
 			return [];
 		}
@@ -121,7 +148,8 @@ export class Telecom {
   }
 	
 	async buildCallMap(callee: vscode.CallHierarchyItem): Promise<number> {
-    const calleeId = Telecom.getIdentifier(callee);
+    const yellowPages = this.yellowPages;
+    const calleeId = Telecom.getIdentifier(callee, yellowPages);
     const visited = new Set(this.contacts.keys());
     if (visited.has(calleeId)) {
 			return Promise.resolve(0);
@@ -272,7 +300,7 @@ export class DocumentLspOperator {
 		return roots;
 	}
 
-	getRef(symbol: Symbol | vscode.DocumentSymbol): vscode.DocumentSymbol | null {
+	getRef(symbol: Symbol | vscode.DocumentSymbol | vscode.CallHierarchyItem): vscode.DocumentSymbol | null {
 		const possibleRefs = this.shortcut.get(symbol.name);
 		if (!possibleRefs) {
 			return null;
@@ -287,11 +315,11 @@ export class DocumentLspOperator {
 	}
 
 	getWrapper(
-		symbol: Symbol | vscode.DocumentSymbol,
+		symbol: Symbol | vscode.DocumentSymbol | vscode.CallHierarchyItem,
 		allowedWrapperKinds: vscode.SymbolKind[]
 	): vscode.DocumentSymbol | null {
 		let refSymbol: vscode.DocumentSymbol | null;
-		if (symbol instanceof Symbol) {
+		if (symbol instanceof Symbol || symbol instanceof vscode.CallHierarchyItem) {
 			refSymbol = this.getRef(symbol);
 		} else {
 			refSymbol = symbol;

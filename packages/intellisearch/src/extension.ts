@@ -111,7 +111,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				// vscode.commands.executeCommand('setContext', 'intellisearch.timeToSearch', true);
 				const childrenCount = await hierarchyTreeProvider.inspectAllElements();
         vscode.window.showInformationMessage(`Inspect total ${childrenCount} elements in the workspace`);
-        telecom.hasInit = true;
+        telecom.init(hierarchyTreeProvider);
         await vscode.commands.executeCommand('intellisearch.initTelecom');
 			} else {
 				vscode.window.showErrorMessage("Please initialize the workspace first");

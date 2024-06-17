@@ -68,6 +68,7 @@ export function registerTelecomFactory(hierarchyTreeProvider: HierarchyTreeProvi
           }
         }
       }
+      telecom.serialize_contacts();
       return countOfCallers;
     }
   );

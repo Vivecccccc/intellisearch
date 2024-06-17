@@ -189,15 +189,16 @@ export class HierarchyTreeProvider
           const newRecords: { method: Method, element: MethodTreeItem }[] = [];
           const methodItems = records.map(
             (record) => {
-              const methodItem = new MethodTreeItem(
+              let methodItem = new MethodTreeItem(
                 element.uri,
                 vscode.TreeItemCollapsibleState.None,
                 "",
                 false,
                 record.method
               );
+              methodItem = this.decorateItem(methodItem) as MethodTreeItem;
               newRecords.push({ method: record.method, element: methodItem });
-              return this.decorateItem(methodItem);
+              return methodItem;
             }
           );
           this.methodsSnapshot.set(element.uri.fsPath, newRecords);
@@ -430,6 +431,7 @@ export class HierarchyTreeProvider
 
   async inspectAllElements(): Promise<number> {
     await this.injectMethodInFile(this.filesSnapshot);
+    await this.intelliDoc();
     
     const recursiveGetChildren = async (element: HierarchyTreeItem | undefined): Promise<number> => {
       const children = await this.getChildren(element);
